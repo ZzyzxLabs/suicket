@@ -25,6 +25,8 @@ use sui::{
 // const ETicketAlreadyUsed: u64 = 0x1002;
 // const ENotOwner: u64 = 0x1003;
 // const EInvalidPayment: u64 = 0x1004;
+const ENotEventOwner: u64 = 0x1000;
+const EMaxSupplyReached: u64 = 0x1001;
 
 const STATUS_VALID: u8 = 0;
 const STATUS_USED: u8 = 1;
@@ -43,7 +45,8 @@ public struct Ticket has key, store {
 }
 
 public struct EventCap has key, store {
-    id: UID
+    id: UID,
+    event_id: ID,
 }
 
 public struct Event has key {
@@ -76,15 +79,17 @@ public fun organize_event (event_name: String, event_description: String, image_
         price: price,
         ticket_sold: 0,
     };
-    transfer::share_object(event);
     let event_cap = EventCap {
         id: object::new(ctx),
+        event_id: object::id(&event),
     };
+    transfer::share_object(event);
     transfer::public_transfer(event_cap, ctx.sender());
 }
 
 #[allow(lint(self_transfer))]
 public fun buy_ticket (in_coin: &mut Coin<SUI>, event: &mut Event, ctx: &mut TxContext) { 
+    assert!(event.ticket_sold + 1 <= event.max_ticket_supply, EMaxSupplyReached);
     let out_coin = coin::split( in_coin, event.price, ctx);
 
     let ticket = Ticket {
@@ -97,7 +102,7 @@ public fun buy_ticket (in_coin: &mut Coin<SUI>, event: &mut Event, ctx: &mut TxC
     };
     event.ticket_sold = event.ticket_sold + 1;
     transfer::public_transfer(ticket, ctx.sender());
-    
+
     transfer::public_transfer(out_coin, event.event_owner_address);
 }
 
@@ -107,4 +112,26 @@ public fun transfer_ticket(ticket: Ticket, recipient: address, _ctx: &mut TxCont
 
 public fun validate_ticket(ticket: &mut Ticket, _ctx: &mut TxContext) {
     ticket.status = STATUS_USED;
+}
+
+
+// for event owner only
+public fun update_description(eventCap: &EventCap, event: &mut Event, description: String, _ctx: &mut TxContext) {
+    assert!(eventCap.event_id == object::id(event), ENotEventOwner);
+    event.event_description = description;
+}
+
+public fun update_image_url(eventCap: &EventCap, event: &mut Event, image_url: String, _ctx: &mut TxContext) {
+    assert!(eventCap.event_id == object::id(event), ENotEventOwner);
+    event.image_url = image_url;
+}
+
+public fun update_max_ticket_supply(eventCap: &EventCap, event: &mut Event, max_ticket_supply: u64, _ctx: &mut TxContext) {
+    assert!(eventCap.event_id == object::id(event), ENotEventOwner);
+    event.max_ticket_supply = max_ticket_supply;
+}
+
+public fun update_price(eventCap: &EventCap, event: &mut Event, price: u64, _ctx: &mut TxContext) {
+    assert!(eventCap.event_id == object::id(event), ENotEventOwner);
+    event.price = price;
 }
