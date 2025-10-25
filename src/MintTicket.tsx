@@ -184,7 +184,7 @@ export function MintTicket() {
 
     const tx = new Transaction();
 
-    const [coin] = tx.splitCoins(tx., [10]);
+    // const [coin] = tx.splitCoins(tx., [10]);
 
     // Call mint_ticket function
     tx.moveCall({
