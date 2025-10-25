@@ -12,6 +12,18 @@ export interface EventCounterData {
   minted: number;
 }
 
+export interface EventData {
+  objectId: string;
+  name: string;
+  description: string;
+  date: string;
+  location: string;
+  maxSupply: number;
+  minted: number;
+  price: number; // in SUI
+  imageUrl?: string;
+}
+
 export const TICKET_STATUS = {
   VALID: 0 as const,
   USED: 1 as const,

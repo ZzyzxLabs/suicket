@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Link, useLocation } from "react-router-do
 import { MintTicket } from "./MintTicket";
 import { MyTickets } from "./MyTickets";
 import { Scanner } from "./Scanner";
+import { CreateEvent } from "./CreateEvent";
 
 function Navigation() {
   const location = useLocation();
@@ -32,6 +33,14 @@ function Navigation() {
           Scanner
         </Button>
       </Link>
+      <Link to="/create-event">
+        <Button
+          variant={location.pathname === "/create-event" ? "solid" : "soft"}
+          size="2"
+        >
+          Create Event
+        </Button>
+      </Link>
     </Flex>
   );
 }
@@ -50,7 +59,7 @@ function AppContent() {
         }}
       >
         <Box>
-          <Heading>CalHacks 12.0 Tickets</Heading>
+          <Heading>Suicket</Heading>
         </Box>
 
         <Navigation />
@@ -70,6 +79,7 @@ function AppContent() {
             <Route path="/" element={<MintTicket />} />
             <Route path="/my-tickets" element={<MyTickets />} />
             <Route path="/scanner" element={<Scanner />} />
+            <Route path="/create-event" element={<CreateEvent />} />
           </Routes>
         </Container>
       </Container>
