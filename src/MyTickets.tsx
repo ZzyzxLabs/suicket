@@ -23,7 +23,7 @@ import { TicketData, TICKET_STATUS } from "./types";
 import { QRCodeSVG } from "qrcode.react";
 
 export function MyTickets() {
-  const counterPackageId = useNetworkVariable("counterPackageId");
+  const suicketPackageId = useNetworkVariable("suicketPackageId");
   const suiClient = useSuiClient();
   const currentAccount = useCurrentAccount();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
@@ -36,7 +36,7 @@ export function MyTickets() {
     {
       owner: currentAccount?.address!,
       filter: {
-        StructType: `${counterPackageId}::suicket::Ticket`,
+        StructType: `${suicketPackageId}::main::Ticket`,
       },
       options: {
         showContent: true,
@@ -48,28 +48,40 @@ export function MyTickets() {
     }
   );
 
+  console.log("Tickets query data:", data);
+  console.log("Tickets data array:", data?.data);
+
   // Parse ticket data
   const tickets: TicketData[] =
     data?.data
       .map((item) => {
+        console.log("Processing ticket item:", item);
+        console.log("Item content:", item.data?.content);
+
         if (!item.data?.content || item.data.content.dataType !== "moveObject") {
+          console.log("No valid content for item:", item.data?.objectId);
           return null;
         }
 
-        const fields = item.data.content.fields as {
-          ticket_number: string;
-          owner: string;
-          status: number;
+        const fields = item.data.content.fields as any;
+        console.log("Ticket fields:", fields);
+
+        const ticket = {
+          objectId: item.data.objectId,
+          ticketNumber: parseInt(fields.ticket_number || "0", 10),
+          status: (fields.status || 0) as 0 | 1,
+          owner: fields.owner || "",
+          eventId: fields.event_id || "",
+          eventName: fields.event_name || "",
+          imageUrl: fields.image_url || "",
         };
 
-        return {
-          objectId: item.data.objectId,
-          ticketNumber: parseInt(fields.ticket_number, 10),
-          status: fields.status as 0 | 1,
-          owner: fields.owner,
-        };
+        console.log("Parsed ticket:", ticket);
+        return ticket;
       })
       .filter((t): t is TicketData => t !== null) || [];
+
+  console.log("Final tickets array:", tickets);
 
   const handleUseTicket = (ticketId: string) => {
     setLoadingTicketId(ticketId);
@@ -80,7 +92,7 @@ export function MyTickets() {
     // Call use_ticket function
     tx.moveCall({
       arguments: [tx.object(ticketId)],
-      target: `${counterPackageId}::suicket::use_ticket`,
+      target: `${suicketPackageId}::suicket::use_ticket`,
     });
 
     signAndExecute(
@@ -159,47 +171,67 @@ export function MyTickets() {
           <Grid columns={{ initial: "1", md: "2", lg: "3" }} gap="4">
             {tickets.map((ticket) => (
               <Card key={ticket.objectId}>
-                <Flex direction="column" gap="3" p="4">
-                  <Flex justify="between" align="center">
-                    <Heading size="4">Ticket #{ticket.ticketNumber}</Heading>
-                    <Badge
-                      color={
-                        ticket.status === TICKET_STATUS.VALID ? "green" : "red"
-                      }
-                      size="2"
-                    >
-                      {ticket.status === TICKET_STATUS.VALID ? "Valid" : "Used"}
-                    </Badge>
-                  </Flex>
-
-                  <Flex justify="center" py="2">
-                    <QRCodeSVG
-                      value={ticket.objectId}
-                      size={200}
-                      level="H"
-                      includeMargin
+                <Flex direction="column" gap="3">
+                  {ticket.imageUrl && (
+                    <img
+                      src={ticket.imageUrl}
+                      alt={ticket.eventName}
+                      style={{
+                        width: "100%",
+                        height: "150px",
+                        objectFit: "cover",
+                        borderRadius: "var(--radius-3)",
+                      }}
                     />
-                  </Flex>
-
-                  <Text size="1" color="gray" style={{ wordBreak: "break-all" }}>
-                    ID: {ticket.objectId}
-                  </Text>
-
-                  {ticket.status === TICKET_STATUS.VALID && (
-                    <Button
-                      size="2"
-                      color="red"
-                      variant="soft"
-                      onClick={() => handleUseTicket(ticket.objectId)}
-                      disabled={loadingTicketId === ticket.objectId}
-                    >
-                      {loadingTicketId === ticket.objectId ? (
-                        <ClipLoader size={16} color="white" />
-                      ) : (
-                        "Mark as Used"
-                      )}
-                    </Button>
                   )}
+
+                  <Flex direction="column" gap="3" p="4">
+                    <Flex justify="between" align="start">
+                      <Flex direction="column" gap="1">
+                        <Heading size="4">{ticket.eventName}</Heading>
+                        <Text size="2" color="gray">
+                          Ticket #{ticket.ticketNumber}
+                        </Text>
+                      </Flex>
+                      <Badge
+                        color={
+                          ticket.status === TICKET_STATUS.VALID ? "green" : "red"
+                        }
+                        size="2"
+                      >
+                        {ticket.status === TICKET_STATUS.VALID ? "Valid" : "Used"}
+                      </Badge>
+                    </Flex>
+
+                    <Flex justify="center" py="2">
+                      <QRCodeSVG
+                        value={ticket.objectId}
+                        size={200}
+                        level="H"
+                        marginSize={4}
+                      />
+                    </Flex>
+
+                    <Text size="1" color="gray" style={{ wordBreak: "break-all" }}>
+                      Ticket ID: {ticket.objectId}
+                    </Text>
+
+                    {ticket.status === TICKET_STATUS.VALID && (
+                      <Button
+                        size="2"
+                        color="red"
+                        variant="soft"
+                        onClick={() => handleUseTicket(ticket.objectId)}
+                        disabled={loadingTicketId === ticket.objectId}
+                      >
+                        {loadingTicketId === ticket.objectId ? (
+                          <ClipLoader size={16} color="white" />
+                        ) : (
+                          "Mark as Used"
+                        )}
+                      </Button>
+                    )}
+                  </Flex>
                 </Flex>
               </Card>
             ))}
