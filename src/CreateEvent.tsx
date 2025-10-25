@@ -19,8 +19,12 @@ import {
 import { useNetworkVariable } from "./networkConfig";
 import ClipLoader from "react-spinners/ClipLoader";
 
+const WALRUS_PUBLISHER_URL = "https://publisher.walrus-testnet.walrus.space";
+const WALRUS_AGGREGATOR_URL = "https://aggregator.walrus-testnet.walrus.space";
+const WALRUS_EPOCHS = 10;
+
 export function CreateEvent() {
-  const counterPackageId = useNetworkVariable("counterPackageId");
+  const suicketPackageId = useNetworkVariable("suicketPackageId");
   const suiClient = useSuiClient();
   const currentAccount = useCurrentAccount();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
@@ -33,12 +37,11 @@ export function CreateEvent() {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    date: "",
-    location: "",
     maxSupply: "",
     price: "",
-    imageUrl: "",
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string>("");
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -50,6 +53,48 @@ export function CreateEvent() {
     }));
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImageFile(e.target.files[0]);
+      setUploadedImageUrl(""); // Clear any previously uploaded URL
+    }
+  };
+
+  const uploadImageToWalrus = async (): Promise<string> => {
+    if (!imageFile) {
+      return "";
+    }
+
+    try {
+      const response = await fetch(
+        `${WALRUS_PUBLISHER_URL}/v1/blobs?epochs=${WALRUS_EPOCHS}`,
+        {
+          method: "PUT",
+          body: imageFile,
+        }
+      );
+
+      if (response.status === 200) {
+        const result = await response.json();
+        let blobId = "";
+
+        if ("alreadyCertified" in result) {
+          blobId = result.alreadyCertified.blobId;
+        } else if ("newlyCreated" in result) {
+          blobId = result.newlyCreated.blobObject.blobId;
+        }
+
+        const imageUrl = `${WALRUS_AGGREGATOR_URL}/v1/blobs/${blobId}`;
+        setUploadedImageUrl(imageUrl);
+        return imageUrl;
+      } else {
+        throw new Error("Failed to upload image to Walrus");
+      }
+    } catch (err) {
+      throw new Error(`Walrus upload failed: ${(err as Error).message}`);
+    }
+  };
+
   const validateForm = (): boolean => {
     if (!formData.name.trim()) {
       setError("Event name is required");
@@ -57,14 +102,6 @@ export function CreateEvent() {
     }
     if (!formData.description.trim()) {
       setError("Description is required");
-      return false;
-    }
-    if (!formData.date.trim()) {
-      setError("Date is required");
-      return false;
-    }
-    if (!formData.location.trim()) {
-      setError("Location is required");
       return false;
     }
     if (!formData.maxSupply || parseInt(formData.maxSupply) <= 0) {
@@ -78,7 +115,7 @@ export function CreateEvent() {
     return true;
   };
 
-  const handleCreateEvent = () => {
+  const handleCreateEvent = async () => {
     if (!currentAccount) {
       setError("Please connect your wallet first");
       return;
@@ -92,51 +129,60 @@ export function CreateEvent() {
     setError("");
     setSuccess("");
 
-    const tx = new Transaction();
-
-    // TODO: Call create_event function when smart contract is ready
-    // For now, this is a placeholder
-    tx.moveCall({
-      arguments: [
-        tx.pure.string(formData.name),
-        tx.pure.string(formData.description),
-        tx.pure.string(formData.date),
-        tx.pure.string(formData.location),
-        tx.pure.u64(parseInt(formData.maxSupply)),
-        tx.pure.u64(Math.floor(parseFloat(formData.price) * 1_000_000_000)), // Convert SUI to MIST
-        tx.pure.string(formData.imageUrl || ""),
-      ],
-      target: `${counterPackageId}::suicket::create_event`,
-    });
-
-    signAndExecute(
-      {
-        transaction: tx,
-      },
-      {
-        onSuccess: async (result) => {
-          await suiClient.waitForTransaction({ digest: result.digest });
-          setSuccess(
-            `Event "${formData.name}" created successfully! Digest: ${result.digest}`
-          );
-          setIsCreating(false);
-          // Reset form
-          setFormData({
-            name: "",
-            description: "",
-            date: "",
-            location: "",
-            maxSupply: "",
-            price: "",
-            imageUrl: "",
-          });
-        },
-        onError: (err) => {
-          setError(`Transaction failed: ${err.message}`);
-          setIsCreating(false);
-        },
+    try {
+      // Upload image to Walrus first if an image is selected
+      let imageUrl = uploadedImageUrl;
+      if (imageFile && !uploadedImageUrl) {
+        imageUrl = await uploadImageToWalrus();
       }
-    );
+
+      const tx = new Transaction();
+
+      // Call create_event function
+      tx.moveCall({
+        arguments: [
+          tx.pure.string(formData.name),
+          tx.pure.string(formData.description),
+          tx.pure.string(imageUrl || ""),
+          tx.pure.u64(parseInt(formData.maxSupply)),
+          tx.pure.u64(Math.floor(parseFloat(formData.price) * 1_000_000_000)), // Convert SUI to MIST
+        ],
+        target: `${suicketPackageId}::main::organize_event`,
+      });
+
+      signAndExecute(
+        {
+          transaction: tx,
+        },
+        {
+          onSuccess: async (result) => {
+            await suiClient.waitForTransaction({ digest: result.digest });
+            setSuccess(
+              `Event "${formData.name}" created successfully! Digest: ${result.digest}`
+            );
+            setIsCreating(false);
+            // Reset form
+            setFormData({
+              name: "",
+              description: "",
+              maxSupply: "",
+              price: "",
+            });
+            setImageFile(null);
+            setUploadedImageUrl("");
+            const fileInput = document.getElementById("image-input") as HTMLInputElement;
+            if (fileInput) fileInput.value = "";
+          },
+          onError: (err) => {
+            setError(`Transaction failed: ${err.message}`);
+            setIsCreating(false);
+          },
+        }
+      );
+    } catch (err) {
+      setError(`Failed to create event: ${(err as Error).message}`);
+      setIsCreating(false);
+    }
   };
 
   if (!currentAccount) {
@@ -210,32 +256,6 @@ export function CreateEvent() {
 
             <Flex direction="column" gap="2">
               <Text size="2" weight="bold">
-                Date *
-              </Text>
-              <TextField.Root
-                name="date"
-                placeholder="e.g., November 15-17, 2025"
-                value={formData.date}
-                onChange={handleInputChange}
-                size="3"
-              />
-            </Flex>
-
-            <Flex direction="column" gap="2">
-              <Text size="2" weight="bold">
-                Location *
-              </Text>
-              <TextField.Root
-                name="location"
-                placeholder="e.g., UC Berkeley, CA"
-                value={formData.location}
-                onChange={handleInputChange}
-                size="3"
-              />
-            </Flex>
-
-            <Flex direction="column" gap="2">
-              <Text size="2" weight="bold">
                 Max Supply (Total Tickets) *
               </Text>
               <TextField.Root
@@ -268,15 +288,32 @@ export function CreateEvent() {
 
             <Flex direction="column" gap="2">
               <Text size="2" weight="bold">
-                Image URL (optional)
+                Event Image (optional)
               </Text>
-              <TextField.Root
-                name="imageUrl"
-                placeholder="https://example.com/image.jpg"
-                value={formData.imageUrl}
-                onChange={handleInputChange}
-                size="3"
+              <input
+                id="image-input"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                style={{
+                  padding: "8px",
+                  borderRadius: "4px",
+                  border: "1px solid var(--gray-a6)",
+                }}
               />
+              <Text size="1" color="gray">
+                Image will be uploaded to Walrus (stored for {WALRUS_EPOCHS} epochs)
+              </Text>
+              {imageFile && (
+                <Text size="1" color="green">
+                  Selected: {imageFile.name}
+                </Text>
+              )}
+              {uploadedImageUrl && (
+                <Text size="1" color="green">
+                  ✓ Uploaded to Walrus
+                </Text>
+              )}
             </Flex>
 
             <Button
@@ -304,17 +341,20 @@ export function CreateEvent() {
               1. Fill in all required fields marked with *
             </Text>
             <Text size="2">
-              2. Set the max supply to limit total tickets available
+              2. Optionally upload an event image (will be stored on Walrus)
             </Text>
             <Text size="2">
-              3. Set price to 0 for free events, or enter amount in SUI
+              3. Set the max supply to limit total tickets available
             </Text>
             <Text size="2">
-              4. Click "Create Event" to publish on-chain
+              4. Set price to 0 for free events, or enter amount in SUI
+            </Text>
+            <Text size="2">
+              5. Click "Create Event" to upload image and publish on-chain
             </Text>
             <Text size="2" color="gray" style={{ fontStyle: "italic" }}>
-              Note: Make sure your smart contract has a create_event function
-              implemented
+              Note: If an image is selected, it will be uploaded to Walrus first,
+              then the event will be created with the image URL
             </Text>
           </Flex>
         </Card>

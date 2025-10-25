@@ -2,7 +2,7 @@
 import { getFullnodeUrl } from "@mysten/sui/client";
 import {
   DEVNET_COUNTER_PACKAGE_ID,
-  TESTNET_COUNTER_PACKAGE_ID,
+  TESTNET_SUICKET_PACKAGE_ID,
   MAINNET_COUNTER_PACKAGE_ID,
   DEVNET_COUNTER_ID,
   TESTNET_COUNTER_ID,
@@ -17,13 +17,14 @@ const { networkConfig, useNetworkVariable, useNetworkVariables } =
       variables: {
         counterPackageId: DEVNET_COUNTER_PACKAGE_ID,
         counterId: DEVNET_COUNTER_ID,
+        graphqlUrl: "https://sui-devnet.mystenlabs.com/graphql",
       },
     },
     testnet: {
       url: getFullnodeUrl("testnet"),
       variables: {
-        counterPackageId: TESTNET_COUNTER_PACKAGE_ID,
-        counterId: TESTNET_COUNTER_ID,
+        suicketPackageId: TESTNET_SUICKET_PACKAGE_ID,
+        graphqlUrl: "https://graphql.testnet.sui.io/graphql",
       },
     },
     mainnet: {
@@ -31,6 +32,7 @@ const { networkConfig, useNetworkVariable, useNetworkVariables } =
       variables: {
         counterPackageId: MAINNET_COUNTER_PACKAGE_ID,
         counterId: MAINNET_COUNTER_ID,
+        graphqlUrl: "https://sui-mainnet.mystenlabs.com/graphql",
       },
     },
   });

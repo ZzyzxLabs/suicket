@@ -5,6 +5,9 @@ export interface TicketData {
   ticketNumber: number;
   status: 0 | 1;  // 0 = Valid, 1 = Used
   owner: string;
+  eventId: string;
+  eventName: string;
+  imageUrl: string;
 }
 
 export interface EventCounterData {
@@ -21,7 +24,7 @@ export interface EventData {
   maxSupply: number;
   minted: number;
   price: number; // in SUI
-  imageUrl?: string;
+  imageUrl: string;
 }
 
 export const TICKET_STATUS = {

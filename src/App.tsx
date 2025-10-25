@@ -6,6 +6,7 @@ import { MintTicket } from "./MintTicket";
 import { MyTickets } from "./MyTickets";
 import { Scanner } from "./Scanner";
 import { CreateEvent } from "./CreateEvent";
+import { WalrusUpload } from "./WalrusUpload";
 
 function Navigation() {
   const location = useLocation();
@@ -41,6 +42,14 @@ function Navigation() {
           Create Event
         </Button>
       </Link>
+      <Link to="/walrus">
+        <Button
+          variant={location.pathname === "/walrus" ? "solid" : "soft"}
+          size="2"
+        >
+          Walrus
+        </Button>
+      </Link>
     </Flex>
   );
 }
@@ -58,13 +67,15 @@ function AppContent() {
           borderBottom: "1px solid var(--gray-a2)",
         }}
       >
-        <Box>
+        <Box style={{ flex: 1 }}>
           <Heading>Suicket</Heading>
         </Box>
 
-        <Navigation />
+        <Box style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+          <Navigation />
+        </Box>
 
-        <Box>
+        <Box style={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
           <ConnectButton />
         </Box>
       </Flex>
@@ -80,6 +91,7 @@ function AppContent() {
             <Route path="/my-tickets" element={<MyTickets />} />
             <Route path="/scanner" element={<Scanner />} />
             <Route path="/create-event" element={<CreateEvent />} />
+            <Route path="/walrus" element={<WalrusUpload />} />
           </Routes>
         </Container>
       </Container>
