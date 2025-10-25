@@ -4,6 +4,7 @@ import {
   useCurrentAccount,
   useSignAndExecuteTransaction,
   useSuiClient,
+  useSuiClientQuery,
 } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
 import {
@@ -26,70 +27,53 @@ export function MyTickets() {
   const suiClient = useSuiClient();
   const currentAccount = useCurrentAccount();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
-  const [tickets, setTickets] = useState<TicketData[]>([]);
-  const [loading, setLoading] = useState(false);
   const [loadingTicketId, setLoadingTicketId] = useState<string>("");
-  const [error, setError] = useState<string>("");
+  const [actionError, setActionError] = useState<string>("");
 
-  // Fetch tickets on component mount
-  useState(() => {
-    if (currentAccount) {
-      fetchTickets();
+  // Use the query hook to fetch tickets
+  const { data, isPending, error, refetch } = useSuiClientQuery(
+    "getOwnedObjects",
+    {
+      owner: currentAccount?.address!,
+      filter: {
+        StructType: `${counterPackageId}::suicket::Ticket`,
+      },
+      options: {
+        showContent: true,
+        showType: true,
+      },
+    },
+    {
+      enabled: !!currentAccount?.address,
     }
-  });
+  );
 
-  const fetchTickets = async () => {
-    if (!currentAccount) return;
+  // Parse ticket data
+  const tickets: TicketData[] =
+    data?.data
+      .map((item) => {
+        if (!item.data?.content || item.data.content.dataType !== "moveObject") {
+          return null;
+        }
 
-    setLoading(true);
-    setError("");
+        const fields = item.data.content.fields as {
+          ticket_number: string;
+          owner: string;
+          status: number;
+        };
 
-    try {
-      // Query owned objects of type Ticket
-      const result = await suiClient.getOwnedObjects({
-        owner: currentAccount.address,
-        options: {
-          showContent: true,
-          showType: true,
-        },
-        filter: {
-          StructType: `${counterPackageId}::suicket::Ticket`,
-        },
-      });
-
-      // Parse ticket data
-      const ticketData: TicketData[] = result.data
-        .map((item) => {
-          if (!item.data?.content || item.data.content.dataType !== "moveObject") {
-            return null;
-          }
-
-          const fields = item.data.content.fields as {
-            ticket_number: string;
-            owner: string;
-            status: number;
-          };
-
-          return {
-            objectId: item.data.objectId,
-            ticketNumber: parseInt(fields.ticket_number, 10),
-            status: fields.status as 0 | 1,
-            owner: fields.owner,
-          };
-        })
-        .filter((t): t is TicketData => t !== null);
-
-      setTickets(ticketData);
-    } catch (err) {
-      setError(`Failed to fetch tickets: ${(err as Error).message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
+        return {
+          objectId: item.data.objectId,
+          ticketNumber: parseInt(fields.ticket_number, 10),
+          status: fields.status as 0 | 1,
+          owner: fields.owner,
+        };
+      })
+      .filter((t): t is TicketData => t !== null) || [];
 
   const handleUseTicket = (ticketId: string) => {
     setLoadingTicketId(ticketId);
-    setError("");
+    setActionError("");
 
     const tx = new Transaction();
 
@@ -108,10 +92,10 @@ export function MyTickets() {
           await suiClient.waitForTransaction({ digest: result.digest });
           setLoadingTicketId("");
           // Refresh tickets
-          fetchTickets();
+          refetch();
         },
         onError: (err) => {
-          setError(`Failed to mark as used: ${err.message}`);
+          setActionError(`Failed to mark as used: ${err.message}`);
           setLoadingTicketId("");
         },
       }
@@ -131,7 +115,7 @@ export function MyTickets() {
     );
   }
 
-  if (loading) {
+  if (isPending) {
     return (
       <Container>
         <Flex justify="center" align="center" py="9">
@@ -151,7 +135,15 @@ export function MyTickets() {
         {error && (
           <Card style={{ backgroundColor: "var(--red-3)" }}>
             <Text color="red" size="2">
-              {error}
+              Error loading tickets: {error.message}
+            </Text>
+          </Card>
+        )}
+
+        {actionError && (
+          <Card style={{ backgroundColor: "var(--red-3)" }}>
+            <Text color="red" size="2">
+              {actionError}
             </Text>
           </Card>
         )}
@@ -214,7 +206,7 @@ export function MyTickets() {
           </Grid>
         )}
 
-        <Button size="2" variant="outline" onClick={fetchTickets}>
+        <Button size="2" variant="outline" onClick={() => refetch()}>
           Refresh Tickets
         </Button>
       </Flex>
