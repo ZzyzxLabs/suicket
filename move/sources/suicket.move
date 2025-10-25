@@ -5,20 +5,20 @@ use std::{
     // vector,
     // type_name::{Self, TypeName},
 };
-// use sui::{
+use sui::{
 //     dynamic_field as df,
 //     dynamic_object_field as dof,
 //     balance::{Self, Balance},
-//     coin::{Self, Coin},
+    coin::{Self, Coin},
 //     object::{Self, UID, ID},
 //     transfer,
 //     tx_context::{Self, TxContext, epoch_timestamp_ms},
 //     vec_map::{Self, VecMap},
-//     sui::SUI,
+    sui::SUI,
 //     clock::{Self, Clock},
 //     table::{Table, Self},
 //     event::emit,
-// };
+};
 // use sui::event;
 
 // const EMaxSupplyReached: u64 = 0x1001;
@@ -84,7 +84,9 @@ public fun organize_event (event_name: String, event_description: String, image_
 }
 
 #[allow(lint(self_transfer))]
-public fun buy_ticket (event: &mut Event, ctx: &mut TxContext) { 
+public fun buy_ticket (in_coin: &mut Coin<SUI>, event: &mut Event, ctx: &mut TxContext) { 
+    let out_coin = coin::split( in_coin, event.price, ctx);
+
     let ticket = Ticket {
         id: object::new(ctx),
         event_id: object::id(event),
@@ -95,6 +97,8 @@ public fun buy_ticket (event: &mut Event, ctx: &mut TxContext) {
     };
     event.ticket_sold = event.ticket_sold + 1;
     transfer::public_transfer(ticket, ctx.sender());
+    
+    transfer::public_transfer(out_coin, event.event_owner_address);
 }
 
 public fun transfer_ticket(ticket: Ticket, recipient: address, _ctx: &mut TxContext) {
@@ -104,209 +108,3 @@ public fun transfer_ticket(ticket: Ticket, recipient: address, _ctx: &mut TxCont
 public fun validate_ticket(ticket: &mut Ticket, _ctx: &mut TxContext) {
     ticket.status = STATUS_USED;
 }
-
-// public fun get_minted_count(counter: &EventCounter): u64 {
-//     counter.minted
-// }
-
-// public fun get_ticket_number(ticket: &Ticket): u64 {
-//     ticket.ticket_number
-// }
-
-// public fun get_owner(ticket: &Ticket): address {
-//     ticket.owner
-// }
-
-// public fun get_status(ticket: &Ticket): u8 {
-//     ticket.status
-// }
-
-// #[test_only]
-// use sui::test_scenario;
-
-// #[test]
-// fun test_mint_within_supply() {
-//     let admin = @0xAD;
-//     let user = @0x1;
-
-//     let mut scenario = test_scenario::begin(admin);
-
-//     {
-//         init(test_scenario::ctx(&mut scenario));
-//     };
-
-//     test_scenario::next_tx(&mut scenario, user);
-//     {
-//         let mut counter = test_scenario::take_shared<EventCounter>(&scenario);
-//         mint_ticket(&mut counter, test_scenario::ctx(&mut scenario));
-//         assert!(counter.minted == 1, 0);
-//         test_scenario::return_shared(counter);
-//     };
-
-//     test_scenario::next_tx(&mut scenario, user);
-//     {
-//         let ticket = test_scenario::take_from_sender<Ticket>(&scenario);
-//         assert!(ticket.ticket_number == 1, 1);
-//         assert!(ticket.owner == user, 2);
-//         assert!(ticket.status == STATUS_VALID, 3);
-//         test_scenario::return_to_sender(&scenario, ticket);
-//     };
-
-//     test_scenario::end(scenario);
-// }
-
-// #[test]
-// #[expected_failure(abort_code = EMaxSupplyReached)]
-// fun test_exceed_max_supply() {
-//     let admin = @0xAD;
-//     let user = @0x1;
-
-//     let mut scenario = test_scenario::begin(admin);
-
-//     {
-//         init(test_scenario::ctx(&mut scenario));
-//     };
-
-//     test_scenario::next_tx(&mut scenario, user);
-//     {
-//         let mut counter = test_scenario::take_shared<EventCounter>(&scenario);
-//         let mut i = 0;
-//         while (i < 51) {
-//             mint_ticket(&mut counter, test_scenario::ctx(&mut scenario));
-//             i = i + 1;
-//         };
-//         test_scenario::return_shared(counter);
-//     };
-
-//     test_scenario::end(scenario);
-// }
-
-// #[test]
-// fun test_use_ticket_success() {
-//     let admin = @0xAD;
-//     let user = @0x1;
-
-//     let mut scenario = test_scenario::begin(admin);
-
-//     {
-//         init(test_scenario::ctx(&mut scenario));
-//     };
-
-//     test_scenario::next_tx(&mut scenario, user);
-//     {
-//         let mut counter = test_scenario::take_shared<EventCounter>(&scenario);
-//         mint_ticket(&mut counter, test_scenario::ctx(&mut scenario));
-//         test_scenario::return_shared(counter);
-//     };
-
-//     test_scenario::next_tx(&mut scenario, user);
-//     {
-//         let mut ticket = test_scenario::take_from_sender<Ticket>(&scenario);
-//         use_ticket(&mut ticket, test_scenario::ctx(&mut scenario));
-//         assert!(ticket.status == STATUS_USED, 0);
-//         test_scenario::return_to_sender(&scenario, ticket);
-//     };
-
-//     test_scenario::end(scenario);
-// }
-
-// #[test]
-// #[expected_failure(abort_code = ETicketAlreadyUsed)]
-// fun test_prevent_double_use() {
-//     let admin = @0xAD;
-//     let user = @0x1;
-
-//     let mut scenario = test_scenario::begin(admin);
-
-//     {
-//         init(test_scenario::ctx(&mut scenario));
-//     };
-
-//     test_scenario::next_tx(&mut scenario, user);
-//     {
-//         let mut counter = test_scenario::take_shared<EventCounter>(&scenario);
-//         mint_ticket(&mut counter, test_scenario::ctx(&mut scenario));
-//         test_scenario::return_shared(counter);
-//     };
-
-//     test_scenario::next_tx(&mut scenario, user);
-//     {
-//         let mut ticket = test_scenario::take_from_sender<Ticket>(&scenario);
-//         use_ticket(&mut ticket, test_scenario::ctx(&mut scenario));
-//         test_scenario::return_to_sender(&scenario, ticket);
-//     };
-
-//     test_scenario::next_tx(&mut scenario, user);
-//     {
-//         let mut ticket = test_scenario::take_from_sender<Ticket>(&scenario);
-//         use_ticket(&mut ticket, test_scenario::ctx(&mut scenario));
-//         test_scenario::return_to_sender(&scenario, ticket);
-//     };
-
-//     test_scenario::end(scenario);
-// }
-
-// #[test]
-// #[expected_failure(abort_code = ENotOwner)]
-// fun test_only_owner_can_use() {
-//     let admin = @0xAD;
-//     let user = @0x1;
-//     let attacker = @0x2;
-
-//     let mut scenario = test_scenario::begin(admin);
-
-//     {
-//         init(test_scenario::ctx(&mut scenario));
-//     };
-
-//     test_scenario::next_tx(&mut scenario, user);
-//     {
-//         let mut counter = test_scenario::take_shared<EventCounter>(&scenario);
-//         mint_ticket(&mut counter, test_scenario::ctx(&mut scenario));
-//         test_scenario::return_shared(counter);
-//     };
-
-//     test_scenario::next_tx(&mut scenario, attacker);
-//     {
-//         let mut ticket = test_scenario::take_from_address<Ticket>(&scenario, user);
-//         use_ticket(&mut ticket, test_scenario::ctx(&mut scenario));
-//         test_scenario::return_to_address(user, ticket);
-//     };
-
-//     test_scenario::end(scenario);
-// }
-
-// #[test]
-// fun test_transfer_ticket() {
-//     let admin = @0xAD;
-//     let user = @0x1;
-//     let recipient = @0x2;
-
-//     let mut scenario = test_scenario::begin(admin);
-
-//     {
-//         init(test_scenario::ctx(&mut scenario));
-//     };
-
-//     test_scenario::next_tx(&mut scenario, user);
-//     {
-//         let mut counter = test_scenario::take_shared<EventCounter>(&scenario);
-//         mint_ticket(&mut counter, test_scenario::ctx(&mut scenario));
-//         test_scenario::return_shared(counter);
-//     };
-
-//     test_scenario::next_tx(&mut scenario, user);
-//     {
-//         let ticket = test_scenario::take_from_sender<Ticket>(&scenario);
-//         transfer_ticket(ticket, recipient, test_scenario::ctx(&mut scenario));
-//     };
-
-//     test_scenario::next_tx(&mut scenario, recipient);
-//     {
-//         let ticket = test_scenario::take_from_sender<Ticket>(&scenario);
-//         assert!(ticket.owner == recipient, 0);
-//         test_scenario::return_to_sender(&scenario, ticket);
-//     };
-
-//     test_scenario::end(scenario);
-// }
