@@ -136,3 +136,66 @@ dist
 .pnp.*
 
 .DS_Store
+
+# Server-specific files
+server/node_modules/
+server/.env
+server/.env.local
+server/.env.production
+server/.env.development
+server/logs/
+server/dist/
+server/build/
+
+# Root-level server files (if server is in root)
+# server.js - Keep this file tracked
+server/
+
+# Additional environment files
+.env.*
+!.env.example
+sendgrid.env
+*.env
+!*.env.example
+
+# API Keys and secrets
+**/api-keys.json
+**/secrets.json
+**/credentials.json
+**/config.json
+**/keys.json
+**/*-key.json
+**/*-keys.json
+**/private-key*
+**/public-key*
+**/secret*
+**/token*
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# Backup files
+*.backup
+*.bak
+*.tmp
+*.temp
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.log
