@@ -825,8 +825,8 @@ export function MintTicket() {
                       </div>
                     </div>
 
-                    {/* Quantity Selector */}
-                    {!isSoldOut && currentAccount && (
+                    {/* Quantity Selector - with spacer for alignment when hidden */}
+                    {!isSoldOut && currentAccount ? (
                       <Flex
                         align="center"
                         justify="between"
@@ -911,6 +911,9 @@ export function MintTicket() {
                           </IconButton>
                         </Flex>
                       </Flex>
+                    ) : (
+                      // Invisible spacer to maintain button alignment across all cards
+                      <div style={{ height: "54px" }} />
                     )}
 
                     {/* CTA Button */}
