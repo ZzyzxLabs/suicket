@@ -196,8 +196,6 @@ export function MintTicket() {
     // }
 
     // setMintingEventId(event.objectId);
-    setError("");
-    setSuccess("");
 
     try {
       const tx = new Transaction();
@@ -206,33 +204,28 @@ export function MintTicket() {
       // const [gas] = tx.splitCoins(tx.gas, [tx.pure("u64", 100000)]);
       // tx.transferObjects([gas], currentAccount.address);
       // Get user's SUI coins
-      const coins = await suiClient.getCoins({
-        owner: currentAccount.address,
-        coinType: "0x2::sui::SUI",
-      });
-
-      tx.setGasPayment([
-        {
-          objectId: coins.data[1].coinObjectId,
-          digest: coins.data[1].digest,
-          version: coins.data[1].version,
-        },
-      ]);
+      // const coins = await suiClient.getCoins({
+      // owner: currentAccount.address,
+      // coinType: "0x2::sui::SUI",
+      // });
+      // console.log("coins", coins);
+      // tx.setGasPayment([
+      //   {
+      //     objectId: coins.data[1].coinObjectId,
+      //     digest: coins.data[1].digest,
+      //     version: coins.data[1].version,
+      //   },
+      // ]);
 
       // tx.setGasPayment([gas]);
+      const [coin] = tx.splitCoins(tx.gas, [
+        tx.pure("u64", event.price * 1_000_000_000),
+      ]);
+      // tx.transferObjects([gas], currentAccount.address);
 
       tx.moveCall({
         target: `${suicketPackageId}::main::buy_ticket`,
-        arguments: [
-          tx.object(
-            Inputs.ObjectRef({
-              objectId: coins.data[0].coinObjectId,
-              digest: coins.data[0].digest,
-              version: coins.data[0].version,
-            }),
-          ),
-          tx.object(event.objectId),
-        ],
+        arguments: [coin, tx.object(event.objectId)],
       });
 
       signAndExecute(

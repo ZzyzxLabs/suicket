@@ -2,7 +2,7 @@ module suicket::main;
 
 use std::{
     string::{String},
-    // vector,
+    vector,
     // type_name::{Self, TypeName},
 };
 use sui::{
@@ -18,6 +18,7 @@ use sui::{
 //     clock::{Self, Clock},
 //     table::{Table, Self},
 //     event::emit,
+    balance::{Self, Balance},
 };
 // use sui::event;
 
@@ -27,6 +28,7 @@ use sui::{
 // const EInvalidPayment: u64 = 0x1004;
 const ENotEventOwner: u64 = 0x1000;
 const EMaxSupplyReached: u64 = 0x1001;
+const EAlreadyUsed: u64 = 0x1002;
 
 const STATUS_VALID: u8 = 0;
 const STATUS_USED: u8 = 1;
@@ -58,6 +60,7 @@ public struct Event has key {
     max_ticket_supply: u64,
     price: u64,
     ticket_sold: u64,
+    checked_in: vector<u64>
 }
 
 // fun init(ctx: &mut TxContext) {
@@ -78,6 +81,7 @@ public fun organize_event (event_name: String, event_description: String, image_
         max_ticket_supply: max_ticket_supply,
         price: price,
         ticket_sold: 0,
+        checked_in: vector::empty()
     };
     let event_cap = EventCap {
         id: object::new(ctx),
@@ -88,9 +92,15 @@ public fun organize_event (event_name: String, event_description: String, image_
 }
 
 #[allow(lint(self_transfer))]
-public fun buy_ticket (in_coin: &mut Coin<SUI>, event: &mut Event, ctx: &mut TxContext) { 
+public fun buy_ticket (user_coin: Coin<SUI>, event: &mut Event, ctx: &mut TxContext) { 
     assert!(event.ticket_sold + 1 <= event.max_ticket_supply, EMaxSupplyReached);
-    let out_coin = coin::split( in_coin, event.price, ctx);
+
+    let mut user_balance: Balance<SUI> = coin::into_balance<SUI>(user_coin);
+    let out_balance = balance::split<SUI>(&mut user_balance, event.price);
+
+    let user_coin = coin::from_balance(user_balance, ctx);
+    let out_coin = coin::from_balance(out_balance, ctx);
+    // let out_coin = coin::split<SUI>( in_coin, event.price, ctx);
 
     let ticket = Ticket {
         id: object::new(ctx),
@@ -102,7 +112,7 @@ public fun buy_ticket (in_coin: &mut Coin<SUI>, event: &mut Event, ctx: &mut TxC
     };
     event.ticket_sold = event.ticket_sold + 1;
     transfer::public_transfer(ticket, ctx.sender());
-
+    transfer::public_transfer(user_coin, ctx.sender());
     transfer::public_transfer(out_coin, event.event_owner_address);
 }
 
@@ -110,7 +120,8 @@ public fun transfer_ticket(ticket: Ticket, recipient: address, _ctx: &mut TxCont
     transfer::public_transfer(ticket, recipient);
 }
 
-public fun validate_ticket(ticket: &mut Ticket, _ctx: &mut TxContext) {
+public fun use_ticket(ticket: &mut Ticket, _ctx: &mut TxContext) {
+    assert!(ticket.status == STATUS_VALID, EAlreadyUsed);
     ticket.status = STATUS_USED;
 }
 
@@ -134,4 +145,18 @@ public fun update_max_ticket_supply(eventCap: &EventCap, event: &mut Event, max_
 public fun update_price(eventCap: &EventCap, event: &mut Event, price: u64, _ctx: &mut TxContext) {
     assert!(eventCap.event_id == object::id(event), ENotEventOwner);
     event.price = price;
+}
+
+public fun delete_event(eventCap: &EventCap, event: Event, _ctx: &mut TxContext) {
+    assert!(eventCap.event_id == object::id(&event), ENotEventOwner);
+    let Event {id,
+    event_name: _, 
+    event_description: _,
+    image_url: _,
+    event_owner_address: _,
+    max_ticket_supply: _,
+    price: _,
+    ticket_sold: _,
+    checked_in: _ } = event;
+    object::delete(id);
 }

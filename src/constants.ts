@@ -1,8 +1,11 @@
 // CHANGED: Updated to support ticket NFT system
 // These will be populated after deploying the Move contract
-export const DEVNET_COUNTER_PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID || "0xTODO";
-export const DEVNET_SUICKET_PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID || "0xTODO";
-export const TESTNET_SUICKET_PACKAGE_ID = "0xb39d59a6d0b23f40b192852852cc526385f77c27e6e7553c5a4e4b22d67c859d";
+export const DEVNET_COUNTER_PACKAGE_ID =
+  import.meta.env.VITE_PACKAGE_ID || "0xTODO";
+export const DEVNET_SUICKET_PACKAGE_ID =
+  import.meta.env.VITE_PACKAGE_ID || "0xTODO";
+export const TESTNET_SUICKET_PACKAGE_ID =
+  "0x8a30e1f335750591b9ad7c4a12f287e62f623e38faa6cec9ee857840b13af0eb";
 export const MAINNET_COUNTER_PACKAGE_ID = "0xTODO";
 export const MAINNET_SUICKET_PACKAGE_ID = "0xTODO";
 
