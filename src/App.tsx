@@ -12,51 +12,53 @@ import { MyEvents } from "./MyEvents";
 function Navigation() {
   const location = useLocation();
 
+  const navButtonStyle = (isActive: boolean) => ({
+    background: isActive
+      ? 'var(--suicket-gradient-primary)'
+      : 'var(--suicket-bg-primary)',
+    color: isActive ? 'white' : 'var(--suicket-text-primary)',
+    border: isActive ? 'none' : '1px solid var(--suicket-border-medium)',
+    boxShadow: isActive ? 'var(--suicket-shadow-blue)' : 'none',
+    transition: 'all var(--suicket-transition-base)',
+    fontWeight: isActive ? '600' : '500',
+  });
+
   return (
     <Flex gap="2">
-      <Link to="/">
-        <Button variant={location.pathname === "/" ? "solid" : "soft"} size="2">
-          Mint
+      <Link to="/" style={{ textDecoration: 'none' }}>
+        <Button
+          variant="soft"
+          size="2"
+          style={navButtonStyle(location.pathname === "/")}
+        >
+          Buy Tickets
         </Button>
       </Link>
-      <Link to="/my-tickets">
+      <Link to="/my-tickets" style={{ textDecoration: 'none' }}>
         <Button
-          variant={location.pathname === "/my-tickets" ? "solid" : "soft"}
+          variant="soft"
           size="2"
+          style={navButtonStyle(location.pathname === "/my-tickets")}
         >
           My Tickets
         </Button>
       </Link>
-      <Link to="/scanner">
+      <Link to="/create-event" style={{ textDecoration: 'none' }}>
         <Button
-          variant={location.pathname === "/scanner" ? "solid" : "soft"}
+          variant="soft"
           size="2"
-        >
-          Scanner
-        </Button>
-      </Link>
-      <Link to="/create-event">
-        <Button
-          variant={location.pathname === "/create-event" ? "solid" : "soft"}
-          size="2"
+          style={navButtonStyle(location.pathname === "/create-event")}
         >
           Create Event
         </Button>
       </Link>
-      <Link to="/my-events">
+      <Link to="/my-events" style={{ textDecoration: 'none' }}>
         <Button
-          variant={location.pathname === "/my-events" ? "solid" : "soft"}
+          variant="soft"
           size="2"
+          style={navButtonStyle(location.pathname === "/my-events")}
         >
           My Events
-        </Button>
-      </Link>
-      <Link to="/walrus">
-        <Button
-          variant={location.pathname === "/walrus" ? "solid" : "soft"}
-          size="2"
-        >
-          Walrus
         </Button>
       </Link>
     </Flex>
@@ -68,16 +70,31 @@ function AppContent() {
     <>
       <Flex
         position="sticky"
-        px="4"
-        py="2"
+        px="6"
+        py="4"
         justify="between"
         align="center"
         style={{
-          borderBottom: "1px solid var(--gray-a2)",
+          background: 'linear-gradient(to right, rgba(14, 165, 233, 0.05), rgba(168, 85, 247, 0.05))',
+          borderBottom: "2px solid var(--suicket-primary-200)",
+          backdropFilter: "blur(10px)",
+          boxShadow: "var(--suicket-shadow-sm)",
         }}
       >
         <Box style={{ flex: 1 }}>
-          <Heading>Suicket</Heading>
+          <Heading
+            size="7"
+            style={{
+              background: 'var(--suicket-gradient-ticket)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              fontWeight: '700',
+              letterSpacing: '-0.02em',
+            }}
+          >
+            Suicket
+          </Heading>
         </Box>
 
         <Box style={{ flex: 1, display: "flex", justifyContent: "center" }}>
@@ -93,7 +110,11 @@ function AppContent() {
           mt="5"
           pt="2"
           px="4"
-          style={{ background: "var(--gray-a2)", minHeight: 500 }}
+          style={{
+            background: "var(--suicket-bg-secondary)",
+            minHeight: "calc(100vh - 100px)",
+            borderRadius: "var(--suicket-radius-xl)",
+          }}
         >
           <Routes>
             <Route path="/" element={<MintTicket />} />

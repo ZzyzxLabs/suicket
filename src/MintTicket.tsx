@@ -21,6 +21,15 @@ import ClipLoader from "react-spinners/ClipLoader";
 import { EventData } from "./types";
 import { SuiGraphQLClient } from "@mysten/sui/graphql";
 import { graphql } from "@mysten/sui/graphql/schemas/2024.4";
+import {
+  Calendar,
+  MapPin,
+  DollarSign,
+  Ticket,
+  CheckCircle2,
+  AlertCircle,
+  Info
+} from "lucide-react";
 
 interface EventNode {
   address: string;
@@ -273,18 +282,38 @@ export function MintTicket() {
         </Text>
 
         {success && (
-          <Card style={{ backgroundColor: "var(--green-3)" }}>
-            <Text color="green" size="2">
-              {success}
-            </Text>
+          <Card
+            className="suicket-fade-in"
+            style={{
+              backgroundColor: "var(--suicket-success-50)",
+              border: "1px solid var(--suicket-success-300)",
+              boxShadow: "var(--suicket-shadow-md)",
+            }}
+          >
+            <Flex align="center" gap="2">
+              <CheckCircle2 size={16} style={{ color: "var(--suicket-success-600)" }} />
+              <Text style={{ color: "var(--suicket-success-700)" }} size="2" weight="medium">
+                {success}
+              </Text>
+            </Flex>
           </Card>
         )}
 
         {error && (
-          <Card style={{ backgroundColor: "var(--red-3)" }}>
-            <Text color="red" size="2">
-              {error}
-            </Text>
+          <Card
+            className="suicket-fade-in"
+            style={{
+              backgroundColor: "var(--suicket-error-50)",
+              border: "1px solid var(--suicket-error-300)",
+              boxShadow: "var(--suicket-shadow-md)",
+            }}
+          >
+            <Flex align="center" gap="2">
+              <AlertCircle size={16} style={{ color: "var(--suicket-error-600)" }} />
+              <Text style={{ color: "var(--suicket-error-700)" }} size="2" weight="medium">
+                {error}
+              </Text>
+            </Flex>
           </Card>
         )}
 
@@ -295,56 +324,167 @@ export function MintTicket() {
             const isMinting = mintingEventId === event.objectId;
 
             return (
-              <Card key={event.objectId}>
-                <Flex direction="column" gap="3">
+              <Card
+                key={event.objectId}
+                className="suicket-card-hover suicket-fade-in"
+                style={{
+                  background: "var(--suicket-bg-primary)",
+                  border: "1px solid var(--suicket-border-light)",
+                  boxShadow: "var(--suicket-shadow-md)",
+                  overflow: "hidden",
+                }}
+              >
+                <Flex direction="column" gap="0">
                   {event.imageUrl && (
-                    <img
-                      src={event.imageUrl}
-                      alt={event.name}
+                    <div
                       style={{
                         width: "100%",
                         height: "200px",
-                        objectFit: "cover",
-                        borderRadius: "var(--radius-3)",
+                        overflow: "hidden",
+                        position: "relative",
                       }}
-                    />
+                    >
+                      <img
+                        src={event.imageUrl}
+                        alt={event.name}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                      {isSoldOut && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "12px",
+                            right: "12px",
+                            background: "var(--suicket-error-500)",
+                            color: "white",
+                            padding: "6px 16px",
+                            borderRadius: "var(--suicket-radius-full)",
+                            fontWeight: "600",
+                            fontSize: "0.875rem",
+                            boxShadow: "var(--suicket-shadow-lg)",
+                          }}
+                        >
+                          SOLD OUT
+                        </div>
+                      )}
+                    </div>
                   )}
 
                   <Flex direction="column" gap="3" p="4">
                     <Flex justify="between" align="start">
-                      <Heading size="5">{event.name}</Heading>
-                      <Badge color={isSoldOut ? "red" : "green"} size="2">
-                        {isSoldOut ? "Sold Out" : `${remainingTickets} left`}
-                      </Badge>
+                      <Heading
+                        size="5"
+                        style={{
+                          color: "var(--suicket-text-primary)",
+                          fontWeight: "700",
+                        }}
+                      >
+                        {event.name}
+                      </Heading>
+                      {!isSoldOut && (
+                        <Badge
+                          size="2"
+                          className={remainingTickets <= 10 ? "suicket-badge-limited" : "suicket-badge-available"}
+                        >
+                          {remainingTickets} left
+                        </Badge>
+                      )}
                     </Flex>
 
-                    <Text size="2" color="gray">
+                    <Text
+                      size="2"
+                      style={{
+                        color: "var(--suicket-text-secondary)",
+                        lineHeight: "1.6",
+                      }}
+                    >
                       {event.description}
                     </Text>
 
-                    <Flex direction="column" gap="1">
-                      <Text size="2" weight="bold">
-                        📅 {event.date}
-                      </Text>
-                      <Text size="2" weight="bold">
-                        📍 {event.location}
-                      </Text>
-                      <Text size="2" weight="bold">
-                        💰 {event.price === 0 ? "Free" : `${event.price} SUI`}
-                      </Text>
+                    {(event.date || event.location) && (
+                      <Flex direction="column" gap="2">
+                        {event.date && (
+                          <Flex align="center" gap="2">
+                            <Calendar size={16} style={{ color: "var(--suicket-primary-500)", flexShrink: 0 }} />
+                            <Text size="2" style={{ color: "var(--suicket-text-secondary)" }}>
+                              {event.date}
+                            </Text>
+                          </Flex>
+                        )}
+                        {event.location && (
+                          <Flex align="center" gap="2">
+                            <MapPin size={16} style={{ color: "var(--suicket-accent-500)", flexShrink: 0 }} />
+                            <Text size="2" style={{ color: "var(--suicket-text-secondary)" }}>
+                              {event.location}
+                            </Text>
+                          </Flex>
+                        )}
+                      </Flex>
+                    )}
+
+                    <Flex justify="between" align="center">
+                      <Flex align="center" gap="2">
+                        <DollarSign
+                          size={18}
+                          style={{
+                            color: event.price === 0 ? "var(--suicket-success-600)" : "var(--suicket-primary-600)",
+                          }}
+                        />
+                        <Text
+                          size="3"
+                          weight="bold"
+                          style={{
+                            color: event.price === 0 ? "var(--suicket-success-600)" : "var(--suicket-primary-600)",
+                          }}
+                        >
+                          {event.price === 0 ? "FREE" : `${event.price} SUI`}
+                        </Text>
+                      </Flex>
+                      <Flex align="center" gap="1">
+                        <Ticket size={14} style={{ color: "var(--suicket-text-tertiary)" }} />
+                        <Text
+                          size="1"
+                          style={{ color: "var(--suicket-text-tertiary)" }}
+                        >
+                          {event.minted} / {event.maxSupply}
+                        </Text>
+                      </Flex>
                     </Flex>
 
-                    <Flex direction="column" gap="1">
-                      <Text size="1" color="gray">
-                        {event.minted} / {event.maxSupply} tickets minted
-                      </Text>
-                    </Flex>
+                    <div className="suicket-progress">
+                      <div
+                        className="suicket-progress-bar"
+                        style={{
+                          width: `${(event.minted / event.maxSupply) * 100}%`,
+                          background: isSoldOut
+                            ? "var(--suicket-error-500)"
+                            : remainingTickets <= 10
+                            ? "var(--suicket-warning-500)"
+                            : "var(--suicket-gradient-primary)",
+                        }}
+                      />
+                    </div>
 
                     <Button
                       size="3"
                       onClick={() => handleMint(event)}
                       disabled={isMinting || isSoldOut || !currentAccount}
-                      style={{ cursor: isMinting ? "wait" : "pointer" }}
+                      style={{
+                        cursor: isMinting ? "wait" : "pointer",
+                        background: isSoldOut
+                          ? "var(--suicket-neutral-300)"
+                          : !currentAccount
+                          ? "var(--suicket-neutral-400)"
+                          : "var(--suicket-gradient-primary)",
+                        color: "white",
+                        border: "none",
+                        fontWeight: "600",
+                        boxShadow: !isSoldOut && currentAccount ? "var(--suicket-shadow-blue)" : "none",
+                      }}
                     >
                       {isMinting ? (
                         <Flex align="center" gap="2">
@@ -356,7 +496,7 @@ export function MintTicket() {
                       ) : !currentAccount ? (
                         "Connect Wallet First"
                       ) : (
-                        `Mint Ticket${event.price > 0 ? ` (${event.price} SUI)` : ""}`
+                        `Buy Ticket${event.price > 0 ? ` - ${event.price} SUI` : " - Free"}`
                       )}
                     </Button>
                   </Flex>
@@ -366,13 +506,34 @@ export function MintTicket() {
           })}
         </Grid>
 
-        <Card>
-          <Flex direction="column" gap="2" p="4">
-            <Heading size="3">How it works</Heading>
-            <Text size="2">1. Connect your Sui wallet</Text>
-            <Text size="2">2. Browse events and click "Mint Ticket"</Text>
-            <Text size="2">3. View your tickets in "My Tickets"</Text>
-            <Text size="2">4. Scan QR code at the event for check-in</Text>
+        <Card
+          style={{
+            background: "var(--suicket-gradient-primary)",
+            border: "none",
+            boxShadow: "var(--suicket-shadow-blue)",
+          }}
+        >
+          <Flex direction="column" gap="3" p="5">
+            <Flex align="center" gap="2">
+              <Info size={20} style={{ color: "white" }} />
+              <Heading size="4" style={{ color: "white" }}>
+                How it works
+              </Heading>
+            </Flex>
+            <Flex direction="column" gap="2">
+              <Text size="2" style={{ color: "rgba(255, 255, 255, 0.95)" }}>
+                1. Connect your Sui wallet
+              </Text>
+              <Text size="2" style={{ color: "rgba(255, 255, 255, 0.95)" }}>
+                2. Browse events and click "Buy Ticket"
+              </Text>
+              <Text size="2" style={{ color: "rgba(255, 255, 255, 0.95)" }}>
+                3. View your tickets in "My Tickets"
+              </Text>
+              <Text size="2" style={{ color: "rgba(255, 255, 255, 0.95)" }}>
+                4. Scan QR code at the event for check-in
+              </Text>
+            </Flex>
           </Flex>
         </Card>
       </Flex>

@@ -15,12 +15,19 @@ import {
   Text,
   Card,
   Grid,
-  Badge,
 } from "@radix-ui/themes";
 import { useNetworkVariable } from "./networkConfig";
 import ClipLoader from "react-spinners/ClipLoader";
 import { TicketData, TICKET_STATUS } from "./types";
 import { QRCodeSVG } from "qrcode.react";
+import {
+  Ticket,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  RefreshCw,
+  Wallet
+} from "lucide-react";
 
 export function MyTickets() {
   const suicketPackageId = useNetworkVariable("suicketPackageId");
@@ -92,7 +99,7 @@ export function MyTickets() {
     // Call use_ticket function
     tx.moveCall({
       arguments: [tx.object(ticketId)],
-      target: `${suicketPackageId}::suicket::use_ticket`,
+      target: `${suicketPackageId}::main::validate_ticket`,
     });
 
     signAndExecute(
@@ -117,10 +124,20 @@ export function MyTickets() {
   if (!currentAccount) {
     return (
       <Container>
-        <Card>
-          <Flex direction="column" gap="4" align="center" py="6">
-            <Heading size="6">Please Connect Your Wallet</Heading>
-            <Text>You need to connect your wallet to view your tickets</Text>
+        <Card
+          style={{
+            background: "var(--suicket-bg-primary)",
+            border: "1px solid var(--suicket-border-light)",
+          }}
+        >
+          <Flex direction="column" gap="4" align="center" py="8">
+            <Wallet size={48} style={{ color: "var(--suicket-primary-500)" }} />
+            <Heading size="6" style={{ color: "var(--suicket-text-primary)" }}>
+              Please Connect Your Wallet
+            </Heading>
+            <Text style={{ color: "var(--suicket-text-secondary)" }}>
+              You need to connect your wallet to view your tickets
+            </Text>
           </Flex>
         </Card>
       </Container>
@@ -145,89 +162,202 @@ export function MyTickets() {
         </Heading>
 
         {error && (
-          <Card style={{ backgroundColor: "var(--red-3)" }}>
-            <Text color="red" size="2">
-              Error loading tickets: {error.message}
-            </Text>
+          <Card
+            className="suicket-fade-in"
+            style={{
+              backgroundColor: "var(--suicket-error-50)",
+              border: "1px solid var(--suicket-error-300)",
+              boxShadow: "var(--suicket-shadow-md)",
+            }}
+          >
+            <Flex align="center" gap="2">
+              <AlertCircle size={16} style={{ color: "var(--suicket-error-600)" }} />
+              <Text style={{ color: "var(--suicket-error-700)" }} size="2" weight="medium">
+                Error loading tickets: {error.message}
+              </Text>
+            </Flex>
           </Card>
         )}
 
         {actionError && (
-          <Card style={{ backgroundColor: "var(--red-3)" }}>
-            <Text color="red" size="2">
-              {actionError}
-            </Text>
+          <Card
+            className="suicket-fade-in"
+            style={{
+              backgroundColor: "var(--suicket-error-50)",
+              border: "1px solid var(--suicket-error-300)",
+              boxShadow: "var(--suicket-shadow-md)",
+            }}
+          >
+            <Flex align="center" gap="2">
+              <AlertCircle size={16} style={{ color: "var(--suicket-error-600)" }} />
+              <Text style={{ color: "var(--suicket-error-700)" }} size="2" weight="medium">
+                {actionError}
+              </Text>
+            </Flex>
           </Card>
         )}
 
         {tickets.length === 0 ? (
-          <Card>
-            <Flex direction="column" gap="4" align="center" py="6">
-              <Heading size="4">No Tickets Yet</Heading>
-              <Text>Go to the Mint page to get your ticket!</Text>
+          <Card
+            style={{
+              background: "var(--suicket-bg-primary)",
+              border: "1px solid var(--suicket-border-light)",
+            }}
+          >
+            <Flex direction="column" gap="4" align="center" py="8">
+              <Ticket size={48} style={{ color: "var(--suicket-neutral-400)" }} />
+              <Heading size="4" style={{ color: "var(--suicket-text-primary)" }}>
+                No Tickets Yet
+              </Heading>
+              <Text style={{ color: "var(--suicket-text-secondary)" }}>
+                Go to the Buy Tickets page to get your first ticket!
+              </Text>
             </Flex>
           </Card>
         ) : (
           <Grid columns={{ initial: "1", md: "2", lg: "3" }} gap="4">
             {tickets.map((ticket) => (
-              <Card key={ticket.objectId}>
-                <Flex direction="column" gap="3">
+              <Card
+                key={ticket.objectId}
+                className="suicket-card-hover suicket-fade-in"
+                style={{
+                  background: "var(--suicket-bg-primary)",
+                  border: ticket.status === TICKET_STATUS.VALID
+                    ? "2px solid var(--suicket-success-400)"
+                    : "1px solid var(--suicket-border-light)",
+                  boxShadow: ticket.status === TICKET_STATUS.VALID
+                    ? "0 4px 12px rgba(34, 197, 94, 0.2)"
+                    : "var(--suicket-shadow-md)",
+                  overflow: "hidden",
+                }}
+              >
+                <Flex direction="column" gap="0">
                   {ticket.imageUrl && (
-                    <img
-                      src={ticket.imageUrl}
-                      alt={ticket.eventName}
+                    <div
                       style={{
                         width: "100%",
                         height: "150px",
-                        objectFit: "cover",
-                        borderRadius: "var(--radius-3)",
+                        overflow: "hidden",
+                        position: "relative",
                       }}
-                    />
+                    >
+                      <img
+                        src={ticket.imageUrl}
+                        alt={ticket.eventName}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                      <Flex
+                        align="center"
+                        gap="1"
+                        style={{
+                          position: "absolute",
+                          top: "12px",
+                          right: "12px",
+                          background: ticket.status === TICKET_STATUS.VALID
+                            ? "var(--suicket-success-500)"
+                            : "var(--suicket-neutral-600)",
+                          color: "white",
+                          padding: "4px 12px",
+                          borderRadius: "var(--suicket-radius-full)",
+                          fontWeight: "600",
+                          fontSize: "0.75rem",
+                          boxShadow: "var(--suicket-shadow-md)",
+                        }}
+                      >
+                        {ticket.status === TICKET_STATUS.VALID ? (
+                          <>
+                            <CheckCircle2 size={12} />
+                            <span>VALID</span>
+                          </>
+                        ) : (
+                          <>
+                            <XCircle size={12} />
+                            <span>USED</span>
+                          </>
+                        )}
+                      </Flex>
+                    </div>
                   )}
 
                   <Flex direction="column" gap="3" p="4">
-                    <Flex justify="between" align="start">
-                      <Flex direction="column" gap="1">
-                        <Heading size="4">{ticket.eventName}</Heading>
-                        <Text size="2" color="gray">
-                          Ticket #{ticket.ticketNumber}
-                        </Text>
-                      </Flex>
-                      <Badge
-                        color={
-                          ticket.status === TICKET_STATUS.VALID ? "green" : "red"
-                        }
-                        size="2"
+                    <Flex direction="column" gap="1">
+                      <Heading
+                        size="4"
+                        style={{
+                          color: "var(--suicket-text-primary)",
+                          fontWeight: "700",
+                        }}
                       >
-                        {ticket.status === TICKET_STATUS.VALID ? "Valid" : "Used"}
-                      </Badge>
+                        {ticket.eventName}
+                      </Heading>
+                      <Text
+                        size="2"
+                        style={{
+                          color: "var(--suicket-text-tertiary)",
+                          fontFamily: "var(--font-mono)",
+                        }}
+                      >
+                        Ticket #{ticket.ticketNumber}
+                      </Text>
                     </Flex>
 
-                    <Flex justify="center" py="2">
+                    <Flex
+                      justify="center"
+                      py="2"
+                      style={{
+                        background: "var(--suicket-bg-secondary)",
+                        borderRadius: "var(--suicket-radius-md)",
+                        padding: "16px",
+                      }}
+                    >
                       <QRCodeSVG
                         value={ticket.objectId}
-                        size={200}
+                        size={180}
                         level="H"
-                        marginSize={4}
+                        marginSize={2}
+                        fgColor="var(--suicket-text-primary)"
+                        bgColor="transparent"
                       />
                     </Flex>
 
-                    <Text size="1" color="gray" style={{ wordBreak: "break-all" }}>
-                      Ticket ID: {ticket.objectId}
+                    <Text
+                      size="1"
+                      style={{
+                        color: "var(--suicket-text-tertiary)",
+                        wordBreak: "break-all",
+                        fontFamily: "var(--font-mono)",
+                        background: "var(--suicket-bg-tertiary)",
+                        padding: "8px",
+                        borderRadius: "var(--suicket-radius-sm)",
+                      }}
+                    >
+                      {ticket.objectId.slice(0, 20)}...
                     </Text>
 
                     {ticket.status === TICKET_STATUS.VALID && (
                       <Button
                         size="2"
-                        color="red"
-                        variant="soft"
                         onClick={() => handleUseTicket(ticket.objectId)}
                         disabled={loadingTicketId === ticket.objectId}
+                        style={{
+                          background: "var(--suicket-gradient-accent)",
+                          color: "white",
+                          border: "none",
+                          fontWeight: "600",
+                          boxShadow: "var(--suicket-shadow-orange)",
+                        }}
                       >
                         {loadingTicketId === ticket.objectId ? (
-                          <ClipLoader size={16} color="white" />
+                          <Flex align="center" gap="2">
+                            <ClipLoader size={16} color="white" />
+                            <Text>Processing...</Text>
+                          </Flex>
                         ) : (
-                          "Mark as Used"
+                          "Check-in at Event"
                         )}
                       </Button>
                     )}
@@ -238,8 +368,19 @@ export function MyTickets() {
           </Grid>
         )}
 
-        <Button size="2" variant="outline" onClick={() => refetch()}>
-          Refresh Tickets
+        <Button
+          size="2"
+          variant="outline"
+          onClick={() => refetch()}
+          style={{
+            border: "1px solid var(--suicket-border-medium)",
+            color: "var(--suicket-text-primary)",
+          }}
+        >
+          <Flex align="center" gap="2">
+            <RefreshCw size={16} />
+            <Text>Refresh Tickets</Text>
+          </Flex>
         </Button>
       </Flex>
     </Container>

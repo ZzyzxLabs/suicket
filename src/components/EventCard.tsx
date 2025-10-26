@@ -9,7 +9,7 @@ import {
     Heading,
     Badge,
 } from "@radix-ui/themes";
-import { Ticket } from "lucide-react";
+import { Ticket, DollarSign, Edit } from "lucide-react";
 
 interface Event {
     id: string;
@@ -131,27 +131,35 @@ export function EventCard({
 
                     {/* Price and Stats */}
                     <Flex justify="between" align="center">
-                        <Badge
-                            size="2"
-                            style={{
-                                background: "var(--green-3)",
-                                color: "var(--green-11)",
-                                border: "1px solid var(--green-7)",
-                                fontFamily: "var(--font-mono)",
-                                fontWeight: "500"
-                            }}
-                        >
-                            {formatPrice(event.price)}
-                        </Badge>
+                        <Flex align="center" gap="2">
+                            <DollarSign
+                                size={16}
+                                style={{
+                                    color: event.price === 0 ? "var(--suicket-success-600)" : "var(--suicket-primary-600)",
+                                }}
+                            />
+                            <Badge
+                                size="2"
+                                style={{
+                                    background: event.price === 0 ? "var(--suicket-success-100)" : "var(--suicket-primary-100)",
+                                    color: event.price === 0 ? "var(--suicket-success-700)" : "var(--suicket-primary-700)",
+                                    border: event.price === 0 ? "1px solid var(--suicket-success-300)" : "1px solid var(--suicket-primary-300)",
+                                    fontFamily: "var(--font-mono)",
+                                    fontWeight: "600"
+                                }}
+                            >
+                                {formatPrice(event.price)}
+                            </Badge>
+                        </Flex>
                         <Flex gap="2" align="center">
-                            <Ticket size={16} style={{ color: "var(--amber-9)" }} />
+                            <Ticket size={16} style={{ color: "var(--suicket-accent-600)" }} />
                             <Text size="2" style={{
-                                color: "var(--green-11)",
+                                color: "var(--suicket-text-primary)",
                                 fontFamily: "var(--font-mono)",
                                 fontWeight: "500",
                                 letterSpacing: "0.02em"
                             }}>
-                                {event.ticketSold}/{event.maxTicketSupply} sold
+                                {event.ticketSold}/{event.maxTicketSupply}
                             </Text>
                         </Flex>
                     </Flex>
@@ -189,12 +197,16 @@ export function EventCard({
                                     variant="soft"
                                     style={{
                                         marginTop: "-4px",
-                                        background: "var(--green-3)",
-                                        color: "var(--green-11)",
-                                        border: "1px solid var(--green-7)"
+                                        background: "var(--suicket-primary-100)",
+                                        color: "var(--suicket-primary-700)",
+                                        border: "1px solid var(--suicket-primary-300)",
+                                        fontWeight: "600"
                                     }}
                                 >
-                                    Edit Event
+                                    <Flex align="center" gap="2">
+                                        <Edit size={16} />
+                                        <span>Edit Event</span>
+                                    </Flex>
                                 </Button>
                             </Dialog.Trigger>
 

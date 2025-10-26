@@ -18,6 +18,17 @@ import {
 } from "@radix-ui/themes";
 import { useNetworkVariable } from "./networkConfig";
 import ClipLoader from "react-spinners/ClipLoader";
+import {
+  PlusCircle,
+  Image,
+  Ticket,
+  DollarSign,
+  CheckCircle2,
+  AlertCircle,
+  Info,
+  Upload,
+  Wallet
+} from "lucide-react";
 
 const WALRUS_PUBLISHER_URL = "https://publisher.walrus-testnet.walrus.space";
 const WALRUS_AGGREGATOR_URL = "https://aggregator.walrus-testnet.walrus.space";
@@ -194,10 +205,20 @@ export function CreateEvent() {
   if (!currentAccount) {
     return (
       <Container>
-        <Card>
-          <Flex direction="column" gap="4" align="center" py="6">
-            <Heading size="6">Admin Access Required</Heading>
-            <Text>Please connect your wallet to create events</Text>
+        <Card
+          style={{
+            background: "var(--suicket-bg-primary)",
+            border: "1px solid var(--suicket-border-light)",
+          }}
+        >
+          <Flex direction="column" gap="4" align="center" py="8">
+            <Wallet size={48} style={{ color: "var(--suicket-primary-500)" }} />
+            <Heading size="6" style={{ color: "var(--suicket-text-primary)" }}>
+              Admin Access Required
+            </Heading>
+            <Text style={{ color: "var(--suicket-text-secondary)" }}>
+              Please connect your wallet to create events
+            </Text>
           </Flex>
         </Card>
       </Container>
@@ -216,27 +237,56 @@ export function CreateEvent() {
         </Text>
 
         {success && (
-          <Card style={{ backgroundColor: "var(--green-3)" }}>
-            <Text color="green" size="2">
-              {success}
-            </Text>
+          <Card
+            className="suicket-fade-in"
+            style={{
+              backgroundColor: "var(--suicket-success-50)",
+              border: "1px solid var(--suicket-success-300)",
+              boxShadow: "var(--suicket-shadow-md)",
+            }}
+          >
+            <Flex align="center" gap="2">
+              <CheckCircle2 size={16} style={{ color: "var(--suicket-success-600)" }} />
+              <Text style={{ color: "var(--suicket-success-700)" }} size="2" weight="medium">
+                {success}
+              </Text>
+            </Flex>
           </Card>
         )}
 
         {error && (
-          <Card style={{ backgroundColor: "var(--red-3)" }}>
-            <Text color="red" size="2">
-              {error}
-            </Text>
+          <Card
+            className="suicket-fade-in"
+            style={{
+              backgroundColor: "var(--suicket-error-50)",
+              border: "1px solid var(--suicket-error-300)",
+              boxShadow: "var(--suicket-shadow-md)",
+            }}
+          >
+            <Flex align="center" gap="2">
+              <AlertCircle size={16} style={{ color: "var(--suicket-error-600)" }} />
+              <Text style={{ color: "var(--suicket-error-700)" }} size="2" weight="medium">
+                {error}
+              </Text>
+            </Flex>
           </Card>
         )}
 
-        <Card>
+        <Card
+          style={{
+            background: "var(--suicket-bg-primary)",
+            border: "1px solid var(--suicket-border-light)",
+            boxShadow: "var(--suicket-shadow-md)",
+          }}
+        >
           <Flex direction="column" gap="4" p="4">
             <Flex direction="column" gap="2">
-              <Text size="2" weight="bold">
-                Event Name *
-              </Text>
+              <Flex align="center" gap="2">
+                <Ticket size={16} style={{ color: "var(--suicket-primary-500)" }} />
+                <Text size="2" weight="bold">
+                  Event Name *
+                </Text>
+              </Flex>
               <TextField.Root
                 name="name"
                 placeholder="e.g., CalHacks 12.0"
@@ -261,9 +311,12 @@ export function CreateEvent() {
             </Flex>
 
             <Flex direction="column" gap="2">
-              <Text size="2" weight="bold">
-                Max Supply (Total Tickets) *
-              </Text>
+              <Flex align="center" gap="2">
+                <Ticket size={16} style={{ color: "var(--suicket-accent-500)" }} />
+                <Text size="2" weight="bold">
+                  Max Supply (Total Tickets) *
+                </Text>
+              </Flex>
               <TextField.Root
                 name="maxSupply"
                 type="number"
@@ -275,9 +328,12 @@ export function CreateEvent() {
             </Flex>
 
             <Flex direction="column" gap="2">
-              <Text size="2" weight="bold">
-                Price (in SUI) *
-              </Text>
+              <Flex align="center" gap="2">
+                <DollarSign size={16} style={{ color: "var(--suicket-success-500)" }} />
+                <Text size="2" weight="bold">
+                  Price (in SUI) *
+                </Text>
+              </Flex>
               <TextField.Root
                 name="price"
                 type="number"
@@ -294,9 +350,12 @@ export function CreateEvent() {
             </Flex>
 
             <Flex direction="column" gap="2">
-              <Text size="2" weight="bold">
-                Event Image (optional)
-              </Text>
+              <Flex align="center" gap="2">
+                <Image size={16} style={{ color: "var(--suicket-secondary-500)" }} />
+                <Text size="2" weight="bold">
+                  Event Image (optional)
+                </Text>
+              </Flex>
               <input
                 id="image-input"
                 type="file"
@@ -304,22 +363,30 @@ export function CreateEvent() {
                 onChange={handleImageChange}
                 style={{
                   padding: "8px",
-                  borderRadius: "4px",
-                  border: "1px solid var(--gray-a6)",
+                  borderRadius: "var(--suicket-radius-md)",
+                  border: "1px solid var(--suicket-border-medium)",
+                  background: "var(--suicket-bg-secondary)",
+                  cursor: "pointer",
                 }}
               />
-              <Text size="1" color="gray">
+              <Text size="1" style={{ color: "var(--suicket-text-tertiary)" }}>
                 Image will be uploaded to Walrus (stored for {WALRUS_EPOCHS} epochs)
               </Text>
               {imageFile && (
-                <Text size="1" color="green">
-                  Selected: {imageFile.name}
-                </Text>
+                <Flex align="center" gap="2">
+                  <Upload size={14} style={{ color: "var(--suicket-success-500)" }} />
+                  <Text size="1" style={{ color: "var(--suicket-success-600)" }}>
+                    Selected: {imageFile.name}
+                  </Text>
+                </Flex>
               )}
               {uploadedImageUrl && (
-                <Text size="1" color="green">
-                  ✓ Uploaded to Walrus
-                </Text>
+                <Flex align="center" gap="2">
+                  <CheckCircle2 size={14} style={{ color: "var(--suicket-success-500)" }} />
+                  <Text size="1" style={{ color: "var(--suicket-success-600)" }}>
+                    Uploaded to Walrus
+                  </Text>
+                </Flex>
               )}
             </Flex>
 
@@ -327,7 +394,14 @@ export function CreateEvent() {
               size="3"
               onClick={handleCreateEvent}
               disabled={isCreating}
-              style={{ cursor: isCreating ? "wait" : "pointer" }}
+              style={{
+                cursor: isCreating ? "wait" : "pointer",
+                background: "var(--suicket-gradient-primary)",
+                color: "white",
+                border: "none",
+                fontWeight: "600",
+                boxShadow: !isCreating ? "var(--suicket-shadow-blue)" : "none",
+              }}
             >
               {isCreating ? (
                 <Flex align="center" gap="2">
@@ -335,34 +409,46 @@ export function CreateEvent() {
                   <Text>Creating Event...</Text>
                 </Flex>
               ) : (
-                "Create Event"
+                <Flex align="center" gap="2">
+                  <PlusCircle size={20} />
+                  <Text>Create Event</Text>
+                </Flex>
               )}
             </Button>
           </Flex>
         </Card>
 
-        <Card>
-          <Flex direction="column" gap="2" p="4">
-            <Heading size="3">Instructions</Heading>
-            <Text size="2">
-              1. Fill in all required fields marked with *
-            </Text>
-            <Text size="2">
-              2. Optionally upload an event image (will be stored on Walrus)
-            </Text>
-            <Text size="2">
-              3. Set the max supply to limit total tickets available
-            </Text>
-            <Text size="2">
-              4. Set price to 0 for free events, or enter amount in SUI
-            </Text>
-            <Text size="2">
-              5. Click "Create Event" to upload image and publish on-chain
-            </Text>
-            <Text size="2" color="gray" style={{ fontStyle: "italic" }}>
-              Note: If an image is selected, it will be uploaded to Walrus first,
-              then the event will be created with the image URL
-            </Text>
+        <Card
+          style={{
+            background: "var(--suicket-gradient-primary)",
+            border: "none",
+            boxShadow: "var(--suicket-shadow-blue)",
+          }}
+        >
+          <Flex direction="column" gap="3" p="5">
+            <Flex align="center" gap="2">
+              <Info size={20} style={{ color: "white" }} />
+              <Heading size="4" style={{ color: "white" }}>
+                Instructions
+              </Heading>
+            </Flex>
+            <Flex direction="column" gap="2">
+              <Text size="2" style={{ color: "rgba(255, 255, 255, 0.95)" }}>
+                1. Fill in all required fields marked with *
+              </Text>
+              <Text size="2" style={{ color: "rgba(255, 255, 255, 0.95)" }}>
+                2. Optionally upload an event image (will be stored on Walrus)
+              </Text>
+              <Text size="2" style={{ color: "rgba(255, 255, 255, 0.95)" }}>
+                3. Set the max supply to limit total tickets available
+              </Text>
+              <Text size="2" style={{ color: "rgba(255, 255, 255, 0.95)" }}>
+                4. Set price to 0 for free events, or enter amount in SUI
+              </Text>
+              <Text size="2" style={{ color: "rgba(255, 255, 255, 0.95)" }}>
+                5. Click "Create Event" to upload image and publish on-chain
+              </Text>
+            </Flex>
           </Flex>
         </Card>
       </Flex>
