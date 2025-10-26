@@ -5,7 +5,7 @@ import {
   useSignAndExecuteTransaction,
   useSuiClient,
 } from "@mysten/dapp-kit";
-import { Transaction } from "@mysten/sui/transactions";
+import { coinWithBalance, Transaction } from "@mysten/sui/transactions";
 import { Button, Container, Flex, Heading, Text, Card, Grid, Badge } from "@radix-ui/themes";
 import { useNetworkVariable } from "./networkConfig";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -167,7 +167,7 @@ export function MintTicket() {
     fetchEvents();
   }, [graphqlUrl, suicketPackageId]);
 
-  const handleMint = (event: EventData) => {
+  const handleMint = async (event: EventData) => {
     if (!currentAccount) {
       setError("Please connect your wallet first");
       return;
@@ -182,33 +182,67 @@ export function MintTicket() {
     setError("");
     setSuccess("");
 
-    const tx = new Transaction();
+    try {
+      const tx = new Transaction();
 
-    // const [coin] = tx.splitCoins(tx., [10]);
+      tx.setSender(currentAccount.address);
+      // Get user's SUI coins
+      // const coins = await suiClient.getCoins({
+      //   owner: currentAccount.address,
+      //   coinType: "0x2::sui::SUI",
+      // });
 
-    // Call mint_ticket function
-    tx.moveCall({
-      target: `${suicketPackageId}::main::buy_ticket`,
-      arguments: [tx.object(event.objectId)],
-    });
+      const coins = coinWithBalance({
+        balance: 1000000000, // Mock balance for testing
+        useGasCoin: true,
+      })
 
-    signAndExecute(
-      {
-        transaction: tx,
-      },
-      {
-        onSuccess: async (result) => {
-          await suiClient.waitForTransaction({ digest: result.digest });
-          setSuccess(`Ticket minted successfully for ${event.name}!`);
-          setMintingEventId("");
-          // TODO: Refetch events when using real on-chain data
+      // if (!coins.data || coins.data.length === 0) {
+      //   setError("No SUI coins found in your wallet");
+      //   setMintingEventId("");
+      //   return;
+      // }
+
+      // Use the first coin as the primary coin
+      // const primaryCoin = coins.data[0];
+
+      // // If there are multiple coins, merge them all into the first one
+      // if (coins.data.length > 1) {
+      //   const otherCoins = coins.data.slice(1).map(coin => tx.object(coin.coinObjectId));
+      //   tx.mergeCoins(tx.object(primaryCoin.coinObjectId), otherCoins);
+      // }
+
+      // const newCoin = tx.splitCoins(tx.gas, [100000000]);
+      // console.log("New coin:", newCoin);
+
+      // Call buy_ticket function
+      console.log(event.objectId, suicketPackageId);
+      tx.moveCall({
+        target: `${suicketPackageId}::main::buy_ticket`,
+        arguments: [coins, tx.object(event.objectId)],
+      });
+
+      signAndExecute(
+        {
+          transaction: tx,
         },
-        onError: (err) => {
-          setError(`Transaction failed: ${err.message}`);
-          setMintingEventId("");
-        },
-      }
-    );
+        {
+          onSuccess: async (result) => {
+            await suiClient.waitForTransaction({ digest: result.digest });
+            setSuccess(`Ticket minted successfully for ${event.name}!`);
+            setMintingEventId("");
+            // TODO: Refetch events when using real on-chain data
+          },
+          onError: (err) => {
+            setError(`Transaction failed: ${err.message}`);
+            setMintingEventId("");
+          },
+        }
+      );
+    } catch (err: any) {
+      setError(`Failed to prepare transaction: ${err.message}`);
+      setMintingEventId("");
+    }
   };
 
   if (loading) {

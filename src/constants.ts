@@ -2,7 +2,7 @@
 // These will be populated after deploying the Move contract
 export const DEVNET_COUNTER_PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID || "0xTODO";
 export const DEVNET_SUICKET_PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID || "0xTODO";
-export const TESTNET_SUICKET_PACKAGE_ID = "0x832f70062c46e139d2191d1901eae9b51744c5a84e774f140bff00139669f787";
+export const TESTNET_SUICKET_PACKAGE_ID = "0xb39d59a6d0b23f40b192852852cc526385f77c27e6e7553c5a4e4b22d67c859d";
 export const MAINNET_COUNTER_PACKAGE_ID = "0xTODO";
 export const MAINNET_SUICKET_PACKAGE_ID = "0xTODO";
 

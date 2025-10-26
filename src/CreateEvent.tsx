@@ -47,6 +47,12 @@ export function CreateEvent() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+
+    // Prevent negative values for price and maxSupply
+    if ((name === "price" || name === "maxSupply") && parseFloat(value) < 0) {
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -276,6 +282,7 @@ export function CreateEvent() {
                 name="price"
                 type="number"
                 step="0.1"
+                min="0"
                 placeholder="e.g., 0 for free, 0.5 for 0.5 SUI"
                 value={formData.price}
                 onChange={handleInputChange}
