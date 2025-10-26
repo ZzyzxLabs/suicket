@@ -5,7 +5,7 @@ import {
   useSignAndExecuteTransaction,
   useSuiClient,
 } from "@mysten/dapp-kit";
-import { coinWithBalance, Transaction, Inputs } from "@mysten/sui/transactions";
+import { Transaction } from "@mysten/sui/transactions";
 import { ZkSendLinkBuilder } from "@mysten/zksend";
 
 import {
@@ -16,6 +16,9 @@ import {
   Text,
   Card,
   Grid,
+  Dialog,
+  TextField,
+  IconButton,
 } from "@radix-ui/themes";
 import { useNetworkVariable } from "./networkConfig";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -31,7 +34,10 @@ import {
   AlertCircle,
   Info,
   XCircle,
-  Wallet
+  Wallet,
+  Plus,
+  Minus,
+  Mail
 } from "lucide-react";
 
 interface EventNode {
@@ -111,6 +117,14 @@ export function MintTicket() {
   const [error, setError] = useState<string | null>(null);
   const [mintingEventId, setMintingEventId] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+
+  // Quantity selector state
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+
+  // Email modal state
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
+  const [emails, setEmails] = useState<string[]>([]);
 
   const fetchEvents = async () => {
     try {
@@ -196,11 +210,54 @@ export function MintTicket() {
     fetchEvents();
   }, [graphqlUrl, suicketPackageId]);
 
+  // Initialize quantities when events load
+  useEffect(() => {
+    if (events.length > 0) {
+      const initialQuantities: Record<string, number> = {};
+      events.forEach(event => {
+        initialQuantities[event.objectId] = 1;
+      });
+      setQuantities(initialQuantities);
+    }
+  }, [events]);
+
+  // Quantity control functions
+  const getQuantity = (eventId: string) => quantities[eventId] || 1;
+
+  const incrementQuantity = (eventId: string, maxAvailable: number) => {
+    setQuantities(prev => ({
+      ...prev,
+      [eventId]: Math.min((prev[eventId] || 1) + 1, maxAvailable)
+    }));
+  };
+
+  const decrementQuantity = (eventId: string) => {
+    setQuantities(prev => ({
+      ...prev,
+      [eventId]: Math.max((prev[eventId] || 1) - 1, 1)
+    }));
+  };
+
   const handleMint = async (event: EventData) => {
     if (!currentAccount) {
       setError("Please connect your wallet first");
       return;
     }
+
+    const quantity = getQuantity(event.objectId);
+
+    // If quantity > 1, show email collection modal
+    if (quantity > 1) {
+      setSelectedEvent(event);
+      setEmails(Array(quantity).fill(""));
+      setShowEmailModal(true);
+      return;
+    }
+
+    // Single ticket purchase
+    setError("");
+    setSuccess("");
+    setMintingEventId(event.objectId);
 
     try {
       const tx = new Transaction();
@@ -223,8 +280,9 @@ export function MintTicket() {
         {
           onSuccess: async (result) => {
             await suiClient.waitForTransaction({ digest: result.digest });
-            setSuccess(`Ticket minted successfully for ${event.name}!`);
+            setSuccess(`Ticket purchased successfully for ${event.name}!`);
             setMintingEventId("");
+            fetchEvents();
           },
           onError: (err) => {
             setError(`Transaction failed: ${err.message}`);
@@ -236,6 +294,16 @@ export function MintTicket() {
       setError(`Failed to prepare transaction: ${err.message}`);
       setMintingEventId("");
     }
+  };
+
+  const handleBulkPurchase = () => {
+    if (!selectedEvent) return;
+
+    const quantity = getQuantity(selectedEvent.objectId);
+    setShowEmailModal(false);
+    setMintingEventId(selectedEvent.objectId);
+
+    buyMultipleTickets(selectedEvent, quantity, emails);
   };
 
   const buyMultipleTickets = async (
@@ -252,11 +320,12 @@ export function MintTicket() {
       const tx = new Transaction();
       const totalPrice = event.price * quantity * 1_000_000_000; // Convert to MIST
 
-      const [coin] = tx.splitCoins(tx.gas, [tx.pure("u64", totalPrice)]);
+      
 
       // Call buy_ticket multiple times in a single transaction
       const links = [];
       for (let i = 0; i < quantity; i++) {
+        const [coin] = tx.splitCoins(tx.gas, [tx.pure("u64", totalPrice)]);
         const link = new ZkSendLinkBuilder({
           sender: currentAccount?.address ?? "",
           network: "testnet",
@@ -680,6 +749,73 @@ export function MintTicket() {
                       </div>
                     </div>
 
+                    {/* Quantity Selector */}
+                    {!isSoldOut && currentAccount && (
+                      <Flex
+                        align="center"
+                        justify="between"
+                        gap="3"
+                        p="3"
+                        style={{
+                          background: "var(--suicket-bg-secondary)",
+                          borderRadius: "var(--suicket-radius-md)",
+                          border: "1px solid var(--suicket-border-light)",
+                        }}
+                      >
+                        <Text size="2" weight="medium" style={{ color: "var(--suicket-text-primary)" }}>
+                          Quantity:
+                        </Text>
+                        <Flex align="center" gap="2">
+                          <IconButton
+                            size="2"
+                            variant="soft"
+                            onClick={() => decrementQuantity(event.objectId)}
+                            disabled={getQuantity(event.objectId) <= 1}
+                            style={{
+                              cursor: getQuantity(event.objectId) <= 1 ? "not-allowed" : "pointer",
+                              background: getQuantity(event.objectId) <= 1
+                                ? "var(--suicket-neutral-200)"
+                                : "var(--suicket-primary-100)",
+                              color: getQuantity(event.objectId) <= 1
+                                ? "var(--suicket-neutral-400)"
+                                : "var(--suicket-primary-600)",
+                            }}
+                          >
+                            <Minus size={16} />
+                          </IconButton>
+                          <Text
+                            size="4"
+                            weight="bold"
+                            style={{
+                              minWidth: "40px",
+                              textAlign: "center",
+                              color: "var(--suicket-text-primary)",
+                              fontFamily: "var(--font-mono)",
+                            }}
+                          >
+                            {getQuantity(event.objectId)}
+                          </Text>
+                          <IconButton
+                            size="2"
+                            variant="soft"
+                            onClick={() => incrementQuantity(event.objectId, remainingTickets)}
+                            disabled={getQuantity(event.objectId) >= remainingTickets}
+                            style={{
+                              cursor: getQuantity(event.objectId) >= remainingTickets ? "not-allowed" : "pointer",
+                              background: getQuantity(event.objectId) >= remainingTickets
+                                ? "var(--suicket-neutral-200)"
+                                : "var(--suicket-primary-100)",
+                              color: getQuantity(event.objectId) >= remainingTickets
+                                ? "var(--suicket-neutral-400)"
+                                : "var(--suicket-primary-600)",
+                            }}
+                          >
+                            <Plus size={16} />
+                          </IconButton>
+                        </Flex>
+                      </Flex>
+                    )}
+
                     {/* CTA Button */}
                     <Button
                       size="4"
@@ -720,7 +856,11 @@ export function MintTicket() {
                         <Flex align="center" gap="2">
                           <Ticket size={20} />
                           <Text>
-                            {event.price > 0 ? `Buy for ${event.price} SUI` : "Get Free Ticket"}
+                            {getQuantity(event.objectId) > 1
+                              ? `Buy ${getQuantity(event.objectId)} Tickets`
+                              : event.price > 0
+                              ? `Buy Now`
+                              : "Get Free Ticket"}
                           </Text>
                         </Flex>
                       )}
@@ -731,6 +871,79 @@ export function MintTicket() {
             );
           })}
         </Grid>
+
+        {/* Email Collection Modal for Bulk Purchase */}
+        <Dialog.Root open={showEmailModal} onOpenChange={setShowEmailModal}>
+          <Dialog.Content style={{ maxWidth: 500 }}>
+            <Dialog.Title>
+              <Flex align="center" gap="2">
+                <Mail size={24} style={{ color: "var(--suicket-primary-600)" }} />
+                <Text>Enter Email Addresses</Text>
+              </Flex>
+            </Dialog.Title>
+            <Dialog.Description size="2" mb="4">
+              <Text style={{ color: "var(--suicket-text-secondary)" }}>
+                Purchasing {selectedEvent && getQuantity(selectedEvent.objectId)} tickets for{" "}
+                {selectedEvent?.name}. Enter an email address for each ticket recipient.
+              </Text>
+            </Dialog.Description>
+
+            <Flex direction="column" gap="3" py="3">
+              {emails.map((email, index) => (
+                <div key={index}>
+                  <Text size="1" weight="medium" mb="1" style={{ color: "var(--suicket-text-tertiary)" }}>
+                    Ticket {index + 1}
+                  </Text>
+                  <TextField.Root
+                    placeholder={`recipient${index + 1}@example.com`}
+                    value={email}
+                    onChange={(e) => {
+                      const newEmails = [...emails];
+                      newEmails[index] = e.target.value;
+                      setEmails(newEmails);
+                    }}
+                    size="3"
+                    style={{
+                      width: "100%",
+                    }}
+                  />
+                </div>
+              ))}
+            </Flex>
+
+            <Flex gap="3" mt="4" justify="end">
+              <Dialog.Close>
+                <Button
+                  variant="soft"
+                  color="gray"
+                  size="3"
+                >
+                  Cancel
+                </Button>
+              </Dialog.Close>
+              <Button
+                size="3"
+                onClick={handleBulkPurchase}
+                disabled={emails.some(email => !email || !email.includes("@"))}
+                style={{
+                  background: "var(--suicket-gradient-primary)",
+                  color: "white",
+                  border: "none",
+                  fontWeight: "600",
+                  cursor: emails.some(email => !email || !email.includes("@")) ? "not-allowed" : "pointer",
+                  opacity: emails.some(email => !email || !email.includes("@")) ? 0.5 : 1,
+                }}
+              >
+                <Flex align="center" gap="2">
+                  <Ticket size={18} />
+                  <Text>
+                    Purchase {selectedEvent && getQuantity(selectedEvent.objectId)} Tickets
+                  </Text>
+                </Flex>
+              </Button>
+            </Flex>
+          </Dialog.Content>
+        </Dialog.Root>
 
         <Card
           style={{
