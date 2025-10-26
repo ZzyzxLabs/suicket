@@ -56,75 +56,156 @@ export function EventCard({
     return (
         <Card
             size="2"
+            className="suicket-event-card suicket-card-hover"
             style={{
-                background: "var(--pink-2)",
-                border: "1px solid var(--green-8)",
-                boxShadow: "0 2px 12px var(--pink-4)",
-                width: "800px",
+                background: "var(--suicket-bg-primary)",
+                border: "none",
+                boxShadow: "var(--suicket-shadow-lg)",
+                width: "100%",
+                maxWidth: "900px",
                 margin: "0 auto",
-                minHeight: "250px"
+                minHeight: "250px",
+                overflow: "hidden",
             }}
         >
-            <Flex gap="4">
+            {/* Top Accent Bar */}
+            <div
+                style={{
+                    height: "6px",
+                    background: isSoldOut
+                        ? "var(--suicket-neutral-400)"
+                        : "var(--suicket-gradient-primary)",
+                }}
+            />
+
+            <Flex gap={{ initial: "3", md: "4" }} direction={{ initial: "column", sm: "row" }} p="4">
                 {/* Image Section */}
-                <div style={{ width: "200px", flexShrink: 0 }}>
+                <div
+                    className="suicket-event-card-image"
+                    style={{
+                        width: "100%",
+                        maxWidth: "220px",
+                        flexShrink: 0,
+                        position: "relative",
+                    }}
+                >
                     <img
                         src={event.imageUrl || "https://placehold.co/600x400?text=No+Image"}
                         alt={event.eventName}
                         style={{
-                            width: "200px",
-                            height: "200px",
+                            width: "100%",
+                            height: "clamp(150px, 30vw, 220px)",
                             objectFit: "cover",
-                            borderRadius: "8px",
+                            borderRadius: "var(--suicket-radius-lg)",
+                            boxShadow: "var(--suicket-shadow-md)",
                         }}
                     />
+                    {/* Status Badge on Image */}
+                    {isSoldOut && (
+                        <div
+                            style={{
+                                position: "absolute",
+                                top: "12px",
+                                right: "12px",
+                                background: "var(--suicket-error-500)",
+                                color: "white",
+                                padding: "6px 14px",
+                                borderRadius: "var(--suicket-radius-full)",
+                                fontWeight: "700",
+                                fontSize: "0.75rem",
+                                boxShadow: "var(--suicket-shadow-lg)",
+                            }}
+                        >
+                            SOLD OUT
+                        </div>
+                    )}
                 </div>
 
                 {/* Content Section */}
-                <Flex direction="column" gap="2" py="2" style={{ flex: 1, paddingRight: "16px" }}>
-                    <Flex justify="between" align="start" gap="4">
-                        <div>
-                            <Heading
-                                size="5"
-                                style={{
-                                    color: "var(--green-11)",
-                                    marginBottom: "4px",
-                                    fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif",
-                                    fontWeight: "700",
-                                    letterSpacing: "-0.025em",
-                                    fontSize: "1.5rem",
-                                    textTransform: "capitalize"
-                                }}
-                            >
-                                {event.eventName}
-                            </Heading>
-                            <Text size="2" style={{
-                                color: "var(--green-10)",
-                                fontFamily: "'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif",
-                                lineHeight: "1.6",
-                                fontWeight: "450",
-                                letterSpacing: "0.01em",
-                                fontSize: "0.95rem"
-                            }}>
-                                {event.eventDescription}
-                            </Text>
-                        </div>
-                        <Badge
-                            size="2"
+                <Flex
+                    direction="column"
+                    gap="3"
+                    py={{ initial: "0", sm: "1" }}
+                    style={{ flex: 1 }}
+                >
+                    {/* Title and Description */}
+                    <div>
+                        <Heading
+                            size="6"
                             style={{
-                                background: isSoldOut ? "var(--red-3)" :
-                                    soldOutPercentage > 75 ? "var(--pink-3)" :
-                                        "var(--green-3)",
-                                color: isSoldOut ? "var(--red-11)" :
-                                    soldOutPercentage > 75 ? "var(--green-11)" :
-                                        "var(--green-11)",
-                                border: "1px solid var(--green-7)"
+                                color: "var(--suicket-text-primary)",
+                                marginBottom: "8px",
+                                fontWeight: "700",
+                                letterSpacing: "-0.02em",
+                                lineHeight: "1.2",
                             }}
                         >
-                            {isSoldOut
-                                ? "SOLD OUT"
-                                : `${event.ticketSold}/${event.maxTicketSupply} tickets`}
-                        </Badge>
+                            {event.eventName}
+                        </Heading>
+                        <Text
+                            size="2"
+                            style={{
+                                color: "var(--suicket-text-secondary)",
+                                lineHeight: "1.6",
+                                display: "-webkit-box",
+                                WebkitLineClamp: "2",
+                                WebkitBoxOrient: "vertical",
+                                overflow: "hidden",
+                            }}
+                        >
+                            {event.eventDescription}
+                        </Text>
+                    </div>
+
+                    {/* Stats Section */}
+                    <Flex
+                        gap="3"
+                        wrap="wrap"
+                        style={{
+                            padding: "12px",
+                            background: "var(--suicket-bg-secondary)",
+                            borderRadius: "var(--suicket-radius-md)",
+                            border: "1px solid var(--suicket-border-light)",
+                        }}
+                    >
+                        <div style={{ flex: "1 1 auto", minWidth: "120px" }}>
+                            <Text
+                                size="1"
+                                weight="medium"
+                                style={{
+                                    color: "var(--suicket-text-tertiary)",
+                                    textTransform: "uppercase",
+                                    letterSpacing: "0.05em",
+                                    marginBottom: "4px",
+                                    display: "block",
+                                }}
+                            >
+                                Status
+                            </Text>
+                            <Badge
+                                size="2"
+                                style={{
+                                    background: isSoldOut
+                                        ? "var(--suicket-error-100)"
+                                        : soldOutPercentage > 75
+                                        ? "var(--suicket-warning-100)"
+                                        : "var(--suicket-success-100)",
+                                    color: isSoldOut
+                                        ? "var(--suicket-error-700)"
+                                        : soldOutPercentage > 75
+                                        ? "var(--suicket-warning-700)"
+                                        : "var(--suicket-success-700)",
+                                    border: isSoldOut
+                                        ? "1px solid var(--suicket-error-300)"
+                                        : soldOutPercentage > 75
+                                        ? "1px solid var(--suicket-warning-300)"
+                                        : "1px solid var(--suicket-success-300)",
+                                    fontWeight: "600",
+                                }}
+                            >
+                                {isSoldOut ? "SOLD OUT" : `${event.maxTicketSupply - event.ticketSold} Available`}
+                            </Badge>
+                        </div>
                     </Flex>
 
                     <div style={{ flex: 1 }}></div>

@@ -364,6 +364,101 @@ img {
   }
 }
 
+/* Responsive Navigation Styles */
+.suicket-nav-desktop {
+  display: flex;
+}
+
+.suicket-nav-mobile-toggle {
+  display: none;
+}
+
+.suicket-nav-mobile-menu {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .suicket-nav-desktop {
+    display: none;
+  }
+
+  .suicket-nav-mobile-toggle {
+    display: block;
+  }
+
+  .suicket-nav-mobile-menu {
+    display: block;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--suicket-bg-primary);
+    border-bottom: 2px solid var(--suicket-border-light);
+    box-shadow: var(--suicket-shadow-lg);
+    z-index: 1000;
+    animation: slideDown 0.2s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .suicket-nav-container {
+    position: static;
+  }
+
+  .suicket-connect-button {
+    display: none;
+  }
+}
+
+/* Mobile-first responsive grid improvements */
+@media (max-width: 640px) {
+  .suicket-card-hover:hover {
+    transform: none; /* Disable hover effects on mobile */
+  }
+
+  /* Better spacing on mobile */
+  body {
+    font-size: 14px;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.3;
+  }
+
+  /* Event Card Mobile Adjustments */
+  .suicket-event-card-image {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .suicket-event-card {
+    min-height: auto !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* Tablet-specific styles */
+  .suicket-container {
+    padding: 0 var(--suicket-spacing-lg);
+  }
+}
+
+@media (min-width: 1025px) {
+  /* Desktop-specific styles */
+  .suicket-container {
+    padding: 0 var(--suicket-spacing-xl);
+  }
+}
+
 /* Print Styles for Tickets */
 @media print {
   body {
@@ -371,6 +466,12 @@ img {
   }
 
   .no-print {
+    display: none !important;
+  }
+
+  .suicket-nav-desktop,
+  .suicket-nav-mobile-toggle,
+  .suicket-connect-button {
     display: none !important;
   }
 }

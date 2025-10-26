@@ -420,34 +420,136 @@ export function CreateEvent() {
 
         <Card
           style={{
-            background: "var(--suicket-gradient-primary)",
-            border: "none",
-            boxShadow: "var(--suicket-shadow-blue)",
+            background: "var(--suicket-bg-primary)",
+            border: "2px solid var(--suicket-primary-300)",
+            boxShadow: "var(--suicket-shadow-md)",
           }}
         >
-          <Flex direction="column" gap="3" p="5">
+          <Flex direction="column" gap="4" p="5">
             <Flex align="center" gap="2">
-              <Info size={20} style={{ color: "white" }} />
-              <Heading size="4" style={{ color: "white" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "var(--suicket-radius-md)",
+                  background: "var(--suicket-primary-100)",
+                }}
+              >
+                <Info size={20} style={{ color: "var(--suicket-primary-600)" }} />
+              </div>
+              <Heading size="5" style={{ color: "var(--suicket-text-primary)", fontWeight: "700" }}>
                 Instructions
               </Heading>
             </Flex>
-            <Flex direction="column" gap="2">
-              <Text size="2" style={{ color: "rgba(255, 255, 255, 0.95)" }}>
-                1. Fill in all required fields marked with *
-              </Text>
-              <Text size="2" style={{ color: "rgba(255, 255, 255, 0.95)" }}>
-                2. Optionally upload an event image (will be stored on Walrus)
-              </Text>
-              <Text size="2" style={{ color: "rgba(255, 255, 255, 0.95)" }}>
-                3. Set the max supply to limit total tickets available
-              </Text>
-              <Text size="2" style={{ color: "rgba(255, 255, 255, 0.95)" }}>
-                4. Set price to 0 for free events, or enter amount in SUI
-              </Text>
-              <Text size="2" style={{ color: "rgba(255, 255, 255, 0.95)" }}>
-                5. Click "Create Event" to upload image and publish on-chain
-              </Text>
+            <Flex direction="column" gap="3">
+              <Flex align="start" gap="3">
+                <div
+                  style={{
+                    minWidth: "28px",
+                    height: "28px",
+                    borderRadius: "var(--suicket-radius-full)",
+                    background: "var(--suicket-primary-500)",
+                    color: "white",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: "700",
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  1
+                </div>
+                <Text size="3" weight="medium" style={{ color: "var(--suicket-text-primary)", paddingTop: "2px" }}>
+                  Fill in all required fields marked with *
+                </Text>
+              </Flex>
+              <Flex align="start" gap="3">
+                <div
+                  style={{
+                    minWidth: "28px",
+                    height: "28px",
+                    borderRadius: "var(--suicket-radius-full)",
+                    background: "var(--suicket-primary-500)",
+                    color: "white",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: "700",
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  2
+                </div>
+                <Text size="3" weight="medium" style={{ color: "var(--suicket-text-primary)", paddingTop: "2px" }}>
+                  Optionally upload an event image (will be stored on Walrus)
+                </Text>
+              </Flex>
+              <Flex align="start" gap="3">
+                <div
+                  style={{
+                    minWidth: "28px",
+                    height: "28px",
+                    borderRadius: "var(--suicket-radius-full)",
+                    background: "var(--suicket-primary-500)",
+                    color: "white",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: "700",
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  3
+                </div>
+                <Text size="3" weight="medium" style={{ color: "var(--suicket-text-primary)", paddingTop: "2px" }}>
+                  Set the max supply to limit total tickets available
+                </Text>
+              </Flex>
+              <Flex align="start" gap="3">
+                <div
+                  style={{
+                    minWidth: "28px",
+                    height: "28px",
+                    borderRadius: "var(--suicket-radius-full)",
+                    background: "var(--suicket-primary-500)",
+                    color: "white",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: "700",
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  4
+                </div>
+                <Text size="3" weight="medium" style={{ color: "var(--suicket-text-primary)", paddingTop: "2px" }}>
+                  Set price to 0 for free events, or enter amount in SUI
+                </Text>
+              </Flex>
+              <Flex align="start" gap="3">
+                <div
+                  style={{
+                    minWidth: "28px",
+                    height: "28px",
+                    borderRadius: "var(--suicket-radius-full)",
+                    background: "var(--suicket-primary-500)",
+                    color: "white",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: "700",
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  5
+                </div>
+                <Text size="3" weight="medium" style={{ color: "var(--suicket-text-primary)", paddingTop: "2px" }}>
+                  Click "Create Event" to upload image and publish on-chain
+                </Text>
+              </Flex>
             </Flex>
           </Flex>
         </Card>

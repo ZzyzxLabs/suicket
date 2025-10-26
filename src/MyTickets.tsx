@@ -99,7 +99,7 @@ export function MyTickets() {
     // Call use_ticket function
     tx.moveCall({
       arguments: [tx.object(ticketId)],
-      target: `${suicketPackageId}::main::validate_ticket`,
+      target: `${suicketPackageId}::main::use_ticket`,
     });
 
     signAndExecute(
@@ -215,7 +215,11 @@ export function MyTickets() {
             </Flex>
           </Card>
         ) : (
-          <Grid columns={{ initial: "1", md: "2", lg: "3" }} gap="4">
+          <Grid
+            columns={{ initial: "1", sm: "1", md: "2", lg: "3", xl: "4" }}
+            gap={{ initial: "3", md: "4" }}
+            style={{ width: "100%" }}
+          >
             {tickets.map((ticket) => (
               <Card
                 key={ticket.objectId}
@@ -236,7 +240,7 @@ export function MyTickets() {
                     <div
                       style={{
                         width: "100%",
-                        height: "150px",
+                        height: "clamp(120px, 30vw, 180px)",
                         overflow: "hidden",
                         position: "relative",
                       }}
@@ -311,17 +315,20 @@ export function MyTickets() {
                       style={{
                         background: "var(--suicket-bg-secondary)",
                         borderRadius: "var(--suicket-radius-md)",
-                        padding: "16px",
+                        padding: "clamp(12px, 3vw, 16px)",
                       }}
                     >
-                      <QRCodeSVG
-                        value={ticket.objectId}
-                        size={180}
-                        level="H"
-                        marginSize={2}
-                        fgColor="var(--suicket-text-primary)"
-                        bgColor="transparent"
-                      />
+                      <div style={{ width: "100%", maxWidth: "200px", aspectRatio: "1" }}>
+                        <QRCodeSVG
+                          value={ticket.objectId}
+                          size={200}
+                          level="H"
+                          marginSize={2}
+                          fgColor="var(--suicket-text-primary)"
+                          bgColor="transparent"
+                          style={{ width: "100%", height: "100%" }}
+                        />
+                      </div>
                     </Flex>
 
                     <Text

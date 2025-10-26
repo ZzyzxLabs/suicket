@@ -8,9 +8,12 @@ import { Scanner } from "./Scanner";
 import { CreateEvent } from "./CreateEvent";
 import { WalrusUpload } from "./WalrusUpload";
 import { MyEvents } from "./MyEvents";
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
 
 function Navigation() {
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navButtonStyle = (isActive: boolean) => ({
     background: isActive
@@ -23,45 +26,73 @@ function Navigation() {
     fontWeight: isActive ? '600' : '500',
   });
 
+  const navLinks = [
+    { to: "/", label: "Buy Tickets" },
+    { to: "/my-tickets", label: "My Tickets" },
+    { to: "/create-event", label: "Create Event" },
+    { to: "/my-events", label: "My Events" },
+  ];
+
   return (
-    <Flex gap="2">
-      <Link to="/" style={{ textDecoration: 'none' }}>
+    <>
+      {/* Desktop Navigation */}
+      <Flex gap="2" className="suicket-nav-desktop">
+        {navLinks.map((link) => (
+          <Link key={link.to} to={link.to} style={{ textDecoration: 'none' }}>
+            <Button
+              variant="soft"
+              size="2"
+              style={navButtonStyle(location.pathname === link.to)}
+            >
+              {link.label}
+            </Button>
+          </Link>
+        ))}
+      </Flex>
+
+      {/* Mobile Navigation Toggle */}
+      <div className="suicket-nav-mobile-toggle">
         <Button
           variant="soft"
           size="2"
-          style={navButtonStyle(location.pathname === "/")}
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          style={{
+            background: 'var(--suicket-bg-primary)',
+            border: '1px solid var(--suicket-border-medium)',
+          }}
         >
-          Buy Tickets
+          {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </Button>
-      </Link>
-      <Link to="/my-tickets" style={{ textDecoration: 'none' }}>
-        <Button
-          variant="soft"
-          size="2"
-          style={navButtonStyle(location.pathname === "/my-tickets")}
-        >
-          My Tickets
-        </Button>
-      </Link>
-      <Link to="/create-event" style={{ textDecoration: 'none' }}>
-        <Button
-          variant="soft"
-          size="2"
-          style={navButtonStyle(location.pathname === "/create-event")}
-        >
-          Create Event
-        </Button>
-      </Link>
-      <Link to="/my-events" style={{ textDecoration: 'none' }}>
-        <Button
-          variant="soft"
-          size="2"
-          style={navButtonStyle(location.pathname === "/my-events")}
-        >
-          My Events
-        </Button>
-      </Link>
-    </Flex>
+      </div>
+
+      {/* Mobile Navigation Menu */}
+      {isMobileMenuOpen && (
+        <div className="suicket-nav-mobile-menu">
+          <Flex direction="column" gap="2" p="4">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                style={{ textDecoration: 'none' }}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Button
+                  variant="soft"
+                  size="3"
+                  style={{
+                    ...navButtonStyle(location.pathname === link.to),
+                    width: '100%',
+                    justifyContent: 'flex-start',
+                  }}
+                >
+                  {link.label}
+                </Button>
+              </Link>
+            ))}
+          </Flex>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -70,8 +101,8 @@ function AppContent() {
     <>
       <Flex
         position="sticky"
-        px="6"
-        py="4"
+        px={{ initial: "4", md: "6" }}
+        py={{ initial: "3", md: "4" }}
         justify="between"
         align="center"
         style={{
@@ -79,13 +110,14 @@ function AppContent() {
           borderBottom: "2px solid var(--suicket-primary-200)",
           backdropFilter: "blur(10px)",
           boxShadow: "var(--suicket-shadow-sm)",
+          position: 'relative',
         }}
       >
-        <Box style={{ flex: 1 }}>
+        <Box style={{ flex: '0 0 auto', minWidth: '140px' }}>
           <Heading
-            size="7"
+            size={{ initial: "5", md: "7" }}
             style={{
-              background: 'var(--suicket-gradient-ticket)',
+              background: 'var(--suicket-primary-600)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
@@ -97,11 +129,27 @@ function AppContent() {
           </Heading>
         </Box>
 
-        <Box style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+        <Box
+          className="suicket-nav-container"
+          style={{
+            flex: '1 1 auto',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
           <Navigation />
         </Box>
 
-        <Box style={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
+        <Box
+          className="suicket-connect-button"
+          style={{
+            flex: '0 0 auto',
+            minWidth: '140px',
+            display: 'flex',
+            justifyContent: 'flex-end',
+          }}
+        >
           <ConnectButton />
         </Box>
       </Flex>
