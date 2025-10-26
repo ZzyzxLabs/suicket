@@ -358,8 +358,7 @@ export function MintTicket() {
                 const emailPromises = urls.map((url, index) =>
                   EmailService.sendTicketConfirmation({
                     eventName: event.name,
-                    eventDate: event.date,
-                    eventLocation: event.location,
+                    eventDescription: event.description,
                     ticketUrls: [url], // Single ticket URL per email
                     recipientEmail: emails[index] || "frederic010992@gmail.com", // Use provided email or fallback
                     quantity: 1, // Single ticket per email
@@ -380,6 +379,7 @@ export function MintTicket() {
               `${quantity} tickets minted successfully for ${event.name}!`,
             );
             setMintingEventId("");
+            fetchEvents();
           },
           onError: (err) => {
             setError(`Transaction failed: ${err.message}`);
@@ -1016,6 +1016,7 @@ export function MintTicket() {
                       setEmails(newEmails);
                     }}
                     size="3"
+                    autoComplete="off"
                     style={{
                       width: "100%",
                     }}

@@ -15,6 +15,7 @@ import {
   Text,
   Card,
   Grid,
+  Badge,
 } from "@radix-ui/themes";
 import { useNetworkVariable } from "./networkConfig";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -26,6 +27,8 @@ import {
   AlertCircle,
   RefreshCw,
   Wallet,
+  Calendar,
+  MapPin,
   Hash,
   ExternalLink
 } from "lucide-react";

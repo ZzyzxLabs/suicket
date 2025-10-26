@@ -3,8 +3,7 @@
 
 export interface TicketEmailData {
   eventName: string;
-  eventDate: string;
-  eventLocation: string;
+  eventDescription: string;
   ticketUrls: string[];
   recipientEmail: string;
   quantity: number;
@@ -21,8 +20,7 @@ export class EmailService {
     try {
       const {
         eventName,
-        eventDate,
-        eventLocation,
+        eventDescription,
         ticketUrls,
         recipientEmail,
         quantity,
@@ -35,8 +33,7 @@ export class EmailService {
         },
         body: JSON.stringify({
           eventName,
-          eventDate,
-          eventLocation,
+          eventDescription,
           ticketUrls,
           recipientEmail,
           quantity,
@@ -59,8 +56,7 @@ export class EmailService {
       console.log(`To: ${data.recipientEmail}`);
       console.log(`Subject: Your ${data.eventName} Tickets - Confirmation`);
       console.log(`Event: ${data.eventName}`);
-      console.log(`Date: ${data.eventDate}`);
-      console.log(`Location: ${data.eventLocation}`);
+      console.log(`Description: ${data.eventDescription}`);
       console.log(`Quantity: ${data.quantity} tickets`);
       console.log("Ticket URLs:");
       data.ticketUrls.forEach((url: string, index: number) => {

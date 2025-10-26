@@ -18,7 +18,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // Email templates
 const generateTicketEmailHTML = (data) => {
-  const { eventName, eventDate, eventLocation, ticketUrls, quantity } = data;
+  const { eventName, eventDescription, ticketUrls, quantity } = data;
 
   const ticketLinks = ticketUrls
     .map(
@@ -46,10 +46,9 @@ const generateTicketEmailHTML = (data) => {
       <div style="background-color: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 20px;">
         <h1 style="color: #007bff; margin: 0 0 20px 0; text-align: center;">🎫 Ticket${quantity > 1 ? "s" : ""} Confirmation</h1>
         <h2 style="color: #333; margin: 0 0 20px 0;">${eventName}</h2>
-        
+
         <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <p style="margin: 0 0 10px 0;"><strong>📅 Date:</strong> ${eventDate}</p>
-          <p style="margin: 0 0 10px 0;"><strong>📍 Location:</strong> ${eventLocation}</p>
+          <p style="margin: 0 0 10px 0;"><strong>📝 Description:</strong> ${eventDescription}</p>
           <p style="margin: 0;"><strong>🎟️ Tickets:</strong> ${quantity}</p>
         </div>
       </div>
@@ -80,7 +79,7 @@ const generateTicketEmailHTML = (data) => {
 };
 
 const generateTicketEmailText = (data) => {
-  const { eventName, eventDate, eventLocation, ticketUrls, quantity } = data;
+  const { eventName, eventDescription, ticketUrls, quantity } = data;
 
   const ticketLinks = ticketUrls
     .map((url, index) => `Ticket ${index + 1}: ${url}`)
@@ -90,8 +89,7 @@ const generateTicketEmailText = (data) => {
 🎫 TICKET${quantity > 1 ? "S" : ""} CONFIRMATION
 
 Event: ${eventName}
-Date: ${eventDate}
-Location: ${eventLocation}
+Description: ${eventDescription}
 Tickets: ${quantity}
 
 YOUR TICKET${quantity > 1 ? "S" : ""}:
@@ -112,8 +110,7 @@ app.post("/api/send-ticket-email", async (req, res) => {
   try {
     const {
       eventName,
-      eventDate,
-      eventLocation,
+      eventDescription,
       ticketUrls,
       recipientEmail,
       quantity,
@@ -134,15 +131,13 @@ app.post("/api/send-ticket-email", async (req, res) => {
       subject: `Your ${eventName} Ticket${quantity > 1 ? "s" : ""} - Confirmation`,
       html: generateTicketEmailHTML({
         eventName,
-        eventDate: eventDate || "",
-        eventLocation: eventLocation || "",
+        eventDescription: eventDescription || "",
         ticketUrls,
         quantity: quantity || 1,
       }),
       text: generateTicketEmailText({
         eventName,
-        eventDate: eventDate || "",
-        eventLocation: eventLocation || "",
+        eventDescription: eventDescription || "",
         ticketUrls,
         quantity: quantity || 1,
       }),
