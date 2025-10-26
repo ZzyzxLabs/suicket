@@ -1,0 +1,477 @@
+/* Suicket Global Styles */
+
+:root {
+  /* Primary Brand Colors */
+  --suicket-primary-50: #f0f9ff;
+  --suicket-primary-100: #e0f2fe;
+  --suicket-primary-200: #bae6fd;
+  --suicket-primary-300: #7dd3fc;
+  --suicket-primary-400: #38bdf8;
+  --suicket-primary-500: #0ea5e9;
+  --suicket-primary-600: #0284c7;
+  --suicket-primary-700: #0369a1;
+  --suicket-primary-800: #075985;
+  --suicket-primary-900: #0c4a6e;
+
+  /* Secondary - Purple */
+  --suicket-secondary-50: #faf5ff;
+  --suicket-secondary-100: #f3e8ff;
+  --suicket-secondary-200: #e9d5ff;
+  --suicket-secondary-300: #d8b4fe;
+  --suicket-secondary-400: #c084fc;
+  --suicket-secondary-500: #a855f7;
+  --suicket-secondary-600: #9333ea;
+  --suicket-secondary-700: #7e22ce;
+  --suicket-secondary-800: #6b21a8;
+  --suicket-secondary-900: #581c87;
+
+  /* Accent - Orange */
+  --suicket-accent-50: #fff7ed;
+  --suicket-accent-100: #ffedd5;
+  --suicket-accent-200: #fed7aa;
+  --suicket-accent-300: #fdba74;
+  --suicket-accent-400: #fb923c;
+  --suicket-accent-500: #f97316;
+  --suicket-accent-600: #ea580c;
+  --suicket-accent-700: #c2410c;
+  --suicket-accent-800: #9a3412;
+  --suicket-accent-900: #7c2d12;
+
+  /* Success - Green */
+  --suicket-success-50: #f0fdf4;
+  --suicket-success-100: #dcfce7;
+  --suicket-success-200: #bbf7d0;
+  --suicket-success-300: #86efac;
+  --suicket-success-400: #4ade80;
+  --suicket-success-500: #22c55e;
+  --suicket-success-600: #16a34a;
+  --suicket-success-700: #15803d;
+  --suicket-success-800: #166534;
+  --suicket-success-900: #14532d;
+
+  /* Warning - Amber */
+  --suicket-warning-50: #fefce8;
+  --suicket-warning-100: #fef9c3;
+  --suicket-warning-200: #fef08a;
+  --suicket-warning-300: #fde047;
+  --suicket-warning-400: #facc15;
+  --suicket-warning-500: #eab308;
+  --suicket-warning-600: #ca8a04;
+  --suicket-warning-700: #a16207;
+  --suicket-warning-800: #854d0e;
+  --suicket-warning-900: #713f12;
+
+  /* Error - Red */
+  --suicket-error-50: #fef2f2;
+  --suicket-error-100: #fee2e2;
+  --suicket-error-200: #fecaca;
+  --suicket-error-300: #fca5a5;
+  --suicket-error-400: #f87171;
+  --suicket-error-500: #ef4444;
+  --suicket-error-600: #dc2626;
+  --suicket-error-700: #b91c1c;
+  --suicket-error-800: #991b1b;
+  --suicket-error-900: #7f1d1d;
+
+  /* Neutral Grays */
+  --suicket-neutral-50: #fafafa;
+  --suicket-neutral-100: #f5f5f5;
+  --suicket-neutral-200: #e5e5e5;
+  --suicket-neutral-300: #d4d4d4;
+  --suicket-neutral-400: #a3a3a3;
+  --suicket-neutral-500: #737373;
+  --suicket-neutral-600: #525252;
+  --suicket-neutral-700: #404040;
+  --suicket-neutral-800: #262626;
+  --suicket-neutral-900: #171717;
+
+  /* Semantic Colors */
+  --suicket-bg-primary: #ffffff;
+  --suicket-bg-secondary: #fafafa;
+  --suicket-bg-tertiary: #f5f5f5;
+  --suicket-text-primary: #171717;
+  --suicket-text-secondary: #525252;
+  --suicket-text-tertiary: #a3a3a3;
+  --suicket-border-light: #e5e5e5;
+  --suicket-border-medium: #d4d4d4;
+
+  /* Gradients */
+  --suicket-gradient-primary: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+  --suicket-gradient-secondary: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+  --suicket-gradient-accent: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+  --suicket-gradient-premium: linear-gradient(135deg, #a855f7 0%, #0ea5e9 100%);
+  --suicket-gradient-ticket: linear-gradient(135deg, #0ea5e9 0%, #a855f7 50%, #fb923c 100%);
+
+  /* Shadows */
+  --suicket-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --suicket-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --suicket-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --suicket-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --suicket-shadow-blue: 0 10px 25px -5px rgb(14 165 233 / 0.3);
+  --suicket-shadow-purple: 0 10px 25px -5px rgb(168 85 247 / 0.3);
+  --suicket-shadow-orange: 0 10px 25px -5px rgb(249 115 22 / 0.3);
+
+  /* Spacing */
+  --suicket-spacing-xs: 4px;
+  --suicket-spacing-sm: 8px;
+  --suicket-spacing-md: 16px;
+  --suicket-spacing-lg: 24px;
+  --suicket-spacing-xl: 32px;
+  --suicket-spacing-2xl: 48px;
+  --suicket-spacing-3xl: 64px;
+
+  /* Border Radius */
+  --suicket-radius-sm: 4px;
+  --suicket-radius-md: 8px;
+  --suicket-radius-lg: 12px;
+  --suicket-radius-xl: 16px;
+  --suicket-radius-2xl: 24px;
+  --suicket-radius-full: 9999px;
+
+  /* Transitions */
+  --suicket-transition-fast: 150ms ease-in-out;
+  --suicket-transition-base: 200ms ease-in-out;
+  --suicket-transition-slow: 300ms ease-in-out;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--suicket-bg-secondary);
+  color: var(--suicket-text-primary);
+  line-height: 1.5;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--suicket-bg-tertiary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--suicket-neutral-400);
+  border-radius: var(--suicket-radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--suicket-neutral-500);
+}
+
+/* Global Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Utility Classes */
+.suicket-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.suicket-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.suicket-scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+.suicket-gradient-text {
+  background: var(--suicket-gradient-ticket);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.suicket-card-hover {
+  transition: all var(--suicket-transition-base);
+}
+
+.suicket-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--suicket-shadow-lg);
+}
+
+/* Button Enhancements */
+button {
+  transition: all var(--suicket-transition-fast);
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Image Loading Optimization */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Focus Styles */
+*:focus-visible {
+  outline: 2px solid var(--suicket-primary-500);
+  outline-offset: 2px;
+}
+
+/* Loading Skeleton */
+.suicket-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--suicket-neutral-200) 0%,
+    var(--suicket-neutral-100) 50%,
+    var(--suicket-neutral-200) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--suicket-radius-md);
+}
+
+/* Custom Badge Styles */
+.suicket-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: var(--suicket-radius-full);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25;
+  transition: all var(--suicket-transition-fast);
+}
+
+.suicket-badge-available {
+  background: var(--suicket-success-100);
+  color: var(--suicket-success-700);
+  border: 1px solid var(--suicket-success-300);
+}
+
+.suicket-badge-limited {
+  background: var(--suicket-warning-100);
+  color: var(--suicket-warning-700);
+  border: 1px solid var(--suicket-warning-300);
+}
+
+.suicket-badge-sold-out {
+  background: var(--suicket-error-100);
+  color: var(--suicket-error-700);
+  border: 1px solid var(--suicket-error-300);
+}
+
+.suicket-badge-premium {
+  background: var(--suicket-gradient-premium);
+  color: white;
+  border: none;
+}
+
+/* Progress Bar */
+.suicket-progress {
+  width: 100%;
+  height: 6px;
+  background: var(--suicket-neutral-200);
+  border-radius: var(--suicket-radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+.suicket-progress-bar {
+  height: 100%;
+  background: var(--suicket-gradient-primary);
+  border-radius: var(--suicket-radius-full);
+  transition: width var(--suicket-transition-slow);
+  position: relative;
+}
+
+.suicket-progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+/* Responsive Container */
+.suicket-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--suicket-spacing-md);
+}
+
+@media (min-width: 768px) {
+  .suicket-container {
+    padding: 0 var(--suicket-spacing-lg);
+  }
+}
+
+/* Responsive Navigation Styles */
+.suicket-nav-desktop {
+  display: flex;
+}
+
+.suicket-nav-mobile-toggle {
+  display: none;
+}
+
+.suicket-nav-mobile-menu {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .suicket-nav-desktop {
+    display: none;
+  }
+
+  .suicket-nav-mobile-toggle {
+    display: block;
+  }
+
+  .suicket-nav-mobile-menu {
+    display: block;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--suicket-bg-primary);
+    border-bottom: 2px solid var(--suicket-border-light);
+    box-shadow: var(--suicket-shadow-lg);
+    z-index: 1000;
+    animation: slideDown 0.2s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .suicket-nav-container {
+    position: static;
+  }
+
+  .suicket-connect-button {
+    display: none;
+  }
+}
+
+/* Mobile-first responsive grid improvements */
+@media (max-width: 640px) {
+  .suicket-card-hover:hover {
+    transform: none; /* Disable hover effects on mobile */
+  }
+
+  /* Better spacing on mobile */
+  body {
+    font-size: 14px;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.3;
+  }
+
+  /* Event Card Mobile Adjustments */
+  .suicket-event-card-image {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .suicket-event-card {
+    min-height: auto !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* Tablet-specific styles */
+  .suicket-container {
+    padding: 0 var(--suicket-spacing-lg);
+  }
+}
+
+@media (min-width: 1025px) {
+  /* Desktop-specific styles */
+  .suicket-container {
+    padding: 0 var(--suicket-spacing-xl);
+  }
+}
+
+/* Print Styles for Tickets */
+@media print {
+  body {
+    background: white;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .suicket-nav-desktop,
+  .suicket-nav-mobile-toggle,
+  .suicket-connect-button {
+    display: none !important;
+  }
+}

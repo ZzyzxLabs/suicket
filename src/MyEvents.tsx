@@ -16,6 +16,12 @@ import { EventCard } from "./components/EventCard";
 import { useNetworkVariable } from "./networkConfig";
 import ClipLoader from "react-spinners/ClipLoader";
 import { type SuiObjectResponse } from "@mysten/sui/client";
+import {
+    Calendar,
+    CheckCircle2,
+    AlertCircle,
+    Wallet
+} from "lucide-react";
 
 interface Event {
     id: string;
@@ -182,10 +188,20 @@ export function MyEvents() {
     if (!currentAccount) {
         return (
             <Container>
-                <Card>
-                    <Flex direction="column" gap="4" align="center" py="6">
-                        <Heading size="6">Connect Wallet</Heading>
-                        <Text>Please connect your wallet to view your events</Text>
+                <Card
+                    style={{
+                        background: "var(--suicket-bg-primary)",
+                        border: "1px solid var(--suicket-border-light)",
+                    }}
+                >
+                    <Flex direction="column" gap="4" align="center" py="8">
+                        <Wallet size={48} style={{ color: "var(--suicket-primary-500)" }} />
+                        <Heading size="6" style={{ color: "var(--suicket-text-primary)" }}>
+                            Connect Wallet
+                        </Heading>
+                        <Text style={{ color: "var(--suicket-text-secondary)" }}>
+                            Please connect your wallet to view your events
+                        </Text>
                     </Flex>
                 </Card>
             </Container>
@@ -210,25 +226,56 @@ export function MyEvents() {
                 </Heading>
 
                 {error && (
-                    <Card style={{ backgroundColor: "var(--red-3)" }}>
-                        <Text color="red" size="2">
-                            {error}
-                        </Text>
+                    <Card
+                        className="suicket-fade-in"
+                        style={{
+                            backgroundColor: "var(--suicket-error-50)",
+                            border: "1px solid var(--suicket-error-300)",
+                            boxShadow: "var(--suicket-shadow-md)",
+                        }}
+                    >
+                        <Flex align="center" gap="2">
+                            <AlertCircle size={16} style={{ color: "var(--suicket-error-600)" }} />
+                            <Text style={{ color: "var(--suicket-error-700)" }} size="2" weight="medium">
+                                {error}
+                            </Text>
+                        </Flex>
                     </Card>
                 )}
 
                 {success && (
-                    <Card style={{ backgroundColor: "var(--green-3)" }}>
-                        <Text color="green" size="2">
-                            {success}
-                        </Text>
+                    <Card
+                        className="suicket-fade-in"
+                        style={{
+                            backgroundColor: "var(--suicket-success-50)",
+                            border: "1px solid var(--suicket-success-300)",
+                            boxShadow: "var(--suicket-shadow-md)",
+                        }}
+                    >
+                        <Flex align="center" gap="2">
+                            <CheckCircle2 size={16} style={{ color: "var(--suicket-success-600)" }} />
+                            <Text style={{ color: "var(--suicket-success-700)" }} size="2" weight="medium">
+                                {success}
+                            </Text>
+                        </Flex>
                     </Card>
                 )}
 
                 {events.length === 0 ? (
-                    <Card>
-                        <Flex direction="column" gap="4" align="center" py="6">
-                            <Text>You haven't created any events yet</Text>
+                    <Card
+                        style={{
+                            background: "var(--suicket-bg-primary)",
+                            border: "1px solid var(--suicket-border-light)",
+                        }}
+                    >
+                        <Flex direction="column" gap="4" align="center" py="8">
+                            <Calendar size={48} style={{ color: "var(--suicket-neutral-400)" }} />
+                            <Heading size="4" style={{ color: "var(--suicket-text-primary)" }}>
+                                No Events Yet
+                            </Heading>
+                            <Text style={{ color: "var(--suicket-text-secondary)" }}>
+                                You haven't created any events yet. Go to Create Event to get started!
+                            </Text>
                         </Flex>
                     </Card>
                 ) : (

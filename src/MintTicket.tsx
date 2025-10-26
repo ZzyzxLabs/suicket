@@ -16,13 +16,23 @@ import {
   Text,
   Card,
   Grid,
-  Badge,
 } from "@radix-ui/themes";
 import { useNetworkVariable } from "./networkConfig";
 import ClipLoader from "react-spinners/ClipLoader";
 import { EventData } from "./types";
 import { SuiGraphQLClient } from "@mysten/sui/graphql";
 import { graphql } from "@mysten/sui/graphql/schemas/2024.4";
+import {
+  Calendar,
+  MapPin,
+  DollarSign,
+  Ticket,
+  CheckCircle2,
+  AlertCircle,
+  Info,
+  XCircle,
+  Wallet
+} from "lucide-react";
 
 interface EventNode {
   address: string;
@@ -312,90 +322,407 @@ export function MintTicket() {
         </Text>
 
         {success && (
-          <Card style={{ backgroundColor: "var(--green-3)" }}>
-            <Text color="green" size="2">
-              {success}
-            </Text>
+          <Card
+            className="suicket-fade-in"
+            style={{
+              backgroundColor: "var(--suicket-success-50)",
+              border: "1px solid var(--suicket-success-300)",
+              boxShadow: "var(--suicket-shadow-md)",
+            }}
+          >
+            <Flex align="center" gap="2">
+              <CheckCircle2 size={16} style={{ color: "var(--suicket-success-600)" }} />
+              <Text style={{ color: "var(--suicket-success-700)" }} size="2" weight="medium">
+                {success}
+              </Text>
+            </Flex>
           </Card>
         )}
 
         {error && (
-          <Card style={{ backgroundColor: "var(--red-3)" }}>
-            <Text color="red" size="2">
-              {error}
-            </Text>
+          <Card
+            className="suicket-fade-in"
+            style={{
+              backgroundColor: "var(--suicket-error-50)",
+              border: "1px solid var(--suicket-error-300)",
+              boxShadow: "var(--suicket-shadow-md)",
+            }}
+          >
+            <Flex align="center" gap="2">
+              <AlertCircle size={16} style={{ color: "var(--suicket-error-600)" }} />
+              <Text style={{ color: "var(--suicket-error-700)" }} size="2" weight="medium">
+                {error}
+              </Text>
+            </Flex>
           </Card>
         )}
 
-        <Grid columns={{ initial: "1", md: "2" }} gap="4">
+        <Grid
+          columns={{ initial: "1", sm: "1", md: "2", lg: "2", xl: "3" }}
+          gap={{ initial: "3", md: "4" }}
+          style={{ width: "100%" }}
+        >
           {events.map((event) => {
             const remainingTickets = event.maxSupply - event.minted;
             const isSoldOut = remainingTickets <= 0;
             const isMinting = mintingEventId === event.objectId;
 
             return (
-              <Card key={event.objectId}>
-                <Flex direction="column" gap="3">
+              <Card
+                key={event.objectId}
+                className="suicket-card-hover suicket-fade-in"
+                style={{
+                  background: "var(--suicket-bg-primary)",
+                  border: "none",
+                  boxShadow: "var(--suicket-shadow-lg)",
+                  overflow: "hidden",
+                  position: "relative",
+                }}
+              >
+                <Flex direction="column" gap="0">
+                  {/* Image with Gradient Overlay */}
                   {event.imageUrl && (
-                    <img
-                      src={event.imageUrl}
-                      alt={event.name}
+                    <div
                       style={{
                         width: "100%",
-                        height: "200px",
-                        objectFit: "cover",
-                        borderRadius: "var(--radius-3)",
+                        height: "clamp(180px, 40vw, 240px)",
+                        overflow: "hidden",
+                        position: "relative",
                       }}
-                    />
+                    >
+                      <img
+                        src={event.imageUrl}
+                        alt={event.name}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                      {/* Gradient overlay for better text contrast */}
+                      <div
+                        style={{
+                          position: "absolute",
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          height: "50%",
+                          background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)",
+                          pointerEvents: "none",
+                        }}
+                      />
+                      {/* Sold out badge */}
+                      {isSoldOut && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "16px",
+                            right: "16px",
+                            background: "var(--suicket-error-500)",
+                            color: "white",
+                            padding: "8px 20px",
+                            borderRadius: "var(--suicket-radius-full)",
+                            fontWeight: "700",
+                            fontSize: "0.875rem",
+                            boxShadow: "0 4px 12px rgba(239, 68, 68, 0.4)",
+                            letterSpacing: "0.05em",
+                          }}
+                        >
+                          SOLD OUT
+                        </div>
+                      )}
+                      {/* Ticket count badge on image */}
+                      {!isSoldOut && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "16px",
+                            right: "16px",
+                            background: remainingTickets <= 10
+                              ? "var(--suicket-warning-500)"
+                              : "var(--suicket-success-500)",
+                            color: "white",
+                            padding: "6px 14px",
+                            borderRadius: "var(--suicket-radius-full)",
+                            fontWeight: "700",
+                            fontSize: "0.75rem",
+                            boxShadow: "var(--suicket-shadow-md)",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}
+                        >
+                          <Ticket size={14} />
+                          <span>{remainingTickets} left</span>
+                        </div>
+                      )}
+                    </div>
                   )}
 
-                  <Flex direction="column" gap="3" p="4">
-                    <Flex justify="between" align="start">
-                      <Heading size="5">{event.name}</Heading>
-                      <Badge color={isSoldOut ? "red" : "green"} size="2">
-                        {isSoldOut ? "Sold Out" : `${remainingTickets} left`}
-                      </Badge>
+                  {/* Ticket stub design accent */}
+                  <div
+                    style={{
+                      height: "8px",
+                      background: isSoldOut
+                        ? "var(--suicket-neutral-300)"
+                        : "var(--suicket-gradient-primary)",
+                    }}
+                  />
+
+                  <Flex direction="column" gap="4" p="5">
+                    {/* Title Section */}
+                    <div>
+                      <Heading
+                        size="6"
+                        style={{
+                          color: "var(--suicket-text-primary)",
+                          fontWeight: "700",
+                          letterSpacing: "-0.02em",
+                          marginBottom: "8px",
+                          lineHeight: "1.2",
+                        }}
+                      >
+                        {event.name}
+                      </Heading>
+                      <Text
+                        size="2"
+                        style={{
+                          color: "var(--suicket-text-secondary)",
+                          lineHeight: "1.6",
+                          display: "-webkit-box",
+                          WebkitLineClamp: "2",
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {event.description}
+                      </Text>
+                    </div>
+
+                    {/* Event Metadata */}
+                    {(event.date || event.location) && (
+                      <Flex
+                        direction="column"
+                        gap="2"
+                        p="3"
+                        style={{
+                          background: "var(--suicket-bg-secondary)",
+                          borderRadius: "var(--suicket-radius-md)",
+                          border: "1px solid var(--suicket-border-light)",
+                        }}
+                      >
+                        {event.date && (
+                          <Flex align="center" gap="3">
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                width: "32px",
+                                height: "32px",
+                                borderRadius: "var(--suicket-radius-sm)",
+                                background: "var(--suicket-primary-100)",
+                              }}
+                            >
+                              <Calendar size={16} style={{ color: "var(--suicket-primary-600)" }} />
+                            </div>
+                            <Text size="2" weight="medium" style={{ color: "var(--suicket-text-primary)" }}>
+                              {event.date}
+                            </Text>
+                          </Flex>
+                        )}
+                        {event.location && (
+                          <Flex align="center" gap="3">
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                width: "32px",
+                                height: "32px",
+                                borderRadius: "var(--suicket-radius-sm)",
+                                background: "var(--suicket-accent-100)",
+                              }}
+                            >
+                              <MapPin size={16} style={{ color: "var(--suicket-accent-600)" }} />
+                            </div>
+                            <Text size="2" weight="medium" style={{ color: "var(--suicket-text-primary)" }}>
+                              {event.location}
+                            </Text>
+                          </Flex>
+                        )}
+                      </Flex>
+                    )}
+
+                    {/* Divider */}
+                    <div style={{ height: "1px", background: "var(--suicket-border-light)" }} />
+
+                    {/* Price and Stats */}
+                    <Flex justify="between" align="center">
+                      <div>
+                        <Text
+                          size="1"
+                          weight="medium"
+                          style={{
+                            color: "var(--suicket-text-tertiary)",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                            marginBottom: "4px",
+                            display: "block",
+                          }}
+                        >
+                          Price
+                        </Text>
+                        <Flex align="center" gap="2">
+                          <DollarSign
+                            size={20}
+                            style={{
+                              color: event.price === 0 ? "var(--suicket-success-600)" : "var(--suicket-primary-600)",
+                            }}
+                          />
+                          <Text
+                            size="5"
+                            weight="bold"
+                            style={{
+                              color: event.price === 0 ? "var(--suicket-success-600)" : "var(--suicket-primary-600)",
+                              letterSpacing: "-0.01em",
+                            }}
+                          >
+                            {event.price === 0 ? "FREE" : `${event.price} SUI`}
+                          </Text>
+                        </Flex>
+                      </div>
+                      <div style={{ textAlign: "right" }}>
+                        <Text
+                          size="1"
+                          weight="medium"
+                          style={{
+                            color: "var(--suicket-text-tertiary)",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                            marginBottom: "4px",
+                            display: "block",
+                          }}
+                        >
+                          Tickets Sold
+                        </Text>
+                        <Flex align="center" gap="2" justify="end">
+                          <Ticket size={16} style={{ color: "var(--suicket-accent-600)" }} />
+                          <Text
+                            size="4"
+                            weight="bold"
+                            style={{ color: "var(--suicket-text-primary)", fontFamily: "var(--font-mono)" }}
+                          >
+                            {event.minted} / {event.maxSupply}
+                          </Text>
+                        </Flex>
+                      </div>
                     </Flex>
 
-                    <Text size="2" color="gray">
-                      {event.description}
-                    </Text>
+                    {/* Enhanced Progress Bar */}
+                    <div>
+                      <Flex justify="between" align="center" mb="2">
+                        <Text size="1" weight="medium" style={{ color: "var(--suicket-text-tertiary)" }}>
+                          Progress
+                        </Text>
+                        <Text
+                          size="1"
+                          weight="bold"
+                          style={{
+                            color: isSoldOut
+                              ? "var(--suicket-error-600)"
+                              : remainingTickets <= 10
+                              ? "var(--suicket-warning-600)"
+                              : "var(--suicket-success-600)",
+                          }}
+                        >
+                          {Math.round((event.minted / event.maxSupply) * 100)}%
+                        </Text>
+                      </Flex>
+                      <div
+                        style={{
+                          width: "100%",
+                          height: "8px",
+                          background: "var(--suicket-neutral-200)",
+                          borderRadius: "var(--suicket-radius-full)",
+                          overflow: "hidden",
+                          position: "relative",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: `${(event.minted / event.maxSupply) * 100}%`,
+                            height: "100%",
+                            background: isSoldOut
+                              ? "var(--suicket-error-500)"
+                              : remainingTickets <= 10
+                              ? "var(--suicket-gradient-accent)"
+                              : "var(--suicket-gradient-primary)",
+                            borderRadius: "var(--suicket-radius-full)",
+                            transition: "width var(--suicket-transition-slow)",
+                            position: "relative",
+                            overflow: "hidden",
+                          }}
+                        >
+                          {/* Shimmer effect */}
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              background: "linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent)",
+                              animation: "shimmer 2s infinite",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
 
-                    <Flex direction="column" gap="1">
-                      <Text size="2" weight="bold">
-                        📅 {event.date}
-                      </Text>
-                      <Text size="2" weight="bold">
-                        📍 {event.location}
-                      </Text>
-                      <Text size="2" weight="bold">
-                        💰 {event.price === 0 ? "Free" : `${event.price} SUI`}
-                      </Text>
-                    </Flex>
-
-                    <Flex direction="column" gap="1">
-                      <Text size="1" color="gray">
-                        {event.minted} / {event.maxSupply} tickets minted
-                      </Text>
-                    </Flex>
-
+                    {/* CTA Button */}
                     <Button
-                      size="3"
+                      size="4"
                       onClick={() => handleMint(event)}
                       disabled={isMinting || isSoldOut || !currentAccount}
-                      style={{ cursor: isMinting ? "wait" : "pointer" }}
+                      style={{
+                        cursor: isMinting ? "wait" : "pointer",
+                        background: isSoldOut
+                          ? "var(--suicket-neutral-400)"
+                          : !currentAccount
+                          ? "var(--suicket-neutral-500)"
+                          : "var(--suicket-gradient-primary)",
+                        color: "white",
+                        border: "none",
+                        fontWeight: "700",
+                        fontSize: "1rem",
+                        boxShadow: !isSoldOut && currentAccount ? "var(--suicket-shadow-blue)" : "none",
+                        transition: "all var(--suicket-transition-fast)",
+                        letterSpacing: "0.02em",
+                      }}
                     >
                       {isMinting ? (
                         <Flex align="center" gap="2">
                           <ClipLoader size={20} color="white" />
-                          <Text>Minting...</Text>
+                          <Text>Processing...</Text>
                         </Flex>
                       ) : isSoldOut ? (
-                        "Sold Out"
+                        <Flex align="center" gap="2">
+                          <XCircle size={20} />
+                          <Text>Sold Out</Text>
+                        </Flex>
                       ) : !currentAccount ? (
-                        "Connect Wallet First"
+                        <Flex align="center" gap="2">
+                          <Wallet size={20} />
+                          <Text>Connect Wallet</Text>
+                        </Flex>
                       ) : (
-                        `Mint Ticket${event.price > 0 ? ` (${event.price} SUI)` : ""}`
+                        <Flex align="center" gap="2">
+                          <Ticket size={20} />
+                          <Text>
+                            {event.price > 0 ? `Buy for ${event.price} SUI` : "Get Free Ticket"}
+                          </Text>
+                        </Flex>
                       )}
                     </Button>
                   </Flex>
@@ -405,13 +732,118 @@ export function MintTicket() {
           })}
         </Grid>
 
-        <Card>
-          <Flex direction="column" gap="2" p="4">
-            <Heading size="3">How it works</Heading>
-            <Text size="2">1. Connect your Sui wallet</Text>
-            <Text size="2">2. Browse events and click "Mint Ticket"</Text>
-            <Text size="2">3. View your tickets in "My Tickets"</Text>
-            <Text size="2">4. Scan QR code at the event for check-in</Text>
+        <Card
+          style={{
+            background: "var(--suicket-bg-primary)",
+            border: "2px solid var(--suicket-primary-300)",
+            boxShadow: "var(--suicket-shadow-md)",
+          }}
+        >
+          <Flex direction="column" gap="4" p="5">
+            <Flex align="center" gap="2">
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "var(--suicket-radius-md)",
+                  background: "var(--suicket-primary-100)",
+                }}
+              >
+                <Info size={20} style={{ color: "var(--suicket-primary-600)" }} />
+              </div>
+              <Heading size="5" style={{ color: "var(--suicket-text-primary)", fontWeight: "700" }}>
+                How it works
+              </Heading>
+            </Flex>
+            <Flex direction="column" gap="3">
+              <Flex align="start" gap="3">
+                <div
+                  style={{
+                    minWidth: "28px",
+                    height: "28px",
+                    borderRadius: "var(--suicket-radius-full)",
+                    background: "var(--suicket-primary-500)",
+                    color: "white",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: "700",
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  1
+                </div>
+                <Text size="3" weight="medium" style={{ color: "var(--suicket-text-primary)", paddingTop: "2px" }}>
+                  Connect your Sui wallet
+                </Text>
+              </Flex>
+              <Flex align="start" gap="3">
+                <div
+                  style={{
+                    minWidth: "28px",
+                    height: "28px",
+                    borderRadius: "var(--suicket-radius-full)",
+                    background: "var(--suicket-primary-500)",
+                    color: "white",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: "700",
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  2
+                </div>
+                <Text size="3" weight="medium" style={{ color: "var(--suicket-text-primary)", paddingTop: "2px" }}>
+                  Browse events and click "Buy Ticket"
+                </Text>
+              </Flex>
+              <Flex align="start" gap="3">
+                <div
+                  style={{
+                    minWidth: "28px",
+                    height: "28px",
+                    borderRadius: "var(--suicket-radius-full)",
+                    background: "var(--suicket-primary-500)",
+                    color: "white",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: "700",
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  3
+                </div>
+                <Text size="3" weight="medium" style={{ color: "var(--suicket-text-primary)", paddingTop: "2px" }}>
+                  View your tickets in "My Tickets"
+                </Text>
+              </Flex>
+              <Flex align="start" gap="3">
+                <div
+                  style={{
+                    minWidth: "28px",
+                    height: "28px",
+                    borderRadius: "var(--suicket-radius-full)",
+                    background: "var(--suicket-primary-500)",
+                    color: "white",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: "700",
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  4
+                </div>
+                <Text size="3" weight="medium" style={{ color: "var(--suicket-text-primary)", paddingTop: "2px" }}>
+                  Scan QR code at the event for check-in
+                </Text>
+              </Flex>
+            </Flex>
           </Flex>
         </Card>
       </Flex>
