@@ -7,6 +7,7 @@ import { MyTickets } from "./MyTickets";
 import { Scanner } from "./Scanner";
 import { CreateEvent } from "./CreateEvent";
 import { WalrusUpload } from "./WalrusUpload";
+import { MyEvents } from "./MyEvents";
 
 function Navigation() {
   const location = useLocation();
@@ -40,6 +41,14 @@ function Navigation() {
           size="2"
         >
           Create Event
+        </Button>
+      </Link>
+      <Link to="/my-events">
+        <Button
+          variant={location.pathname === "/my-events" ? "solid" : "soft"}
+          size="2"
+        >
+          My Events
         </Button>
       </Link>
       <Link to="/walrus">
@@ -91,6 +100,7 @@ function AppContent() {
             <Route path="/my-tickets" element={<MyTickets />} />
             <Route path="/scanner" element={<Scanner />} />
             <Route path="/create-event" element={<CreateEvent />} />
+            <Route path="/my-events" element={<MyEvents />} />
             <Route path="/walrus" element={<WalrusUpload />} />
           </Routes>
         </Container>
