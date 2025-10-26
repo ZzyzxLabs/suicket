@@ -25,6 +25,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import { EventData } from "./types";
 import { SuiGraphQLClient } from "@mysten/sui/graphql";
 import { graphql } from "@mysten/sui/graphql/schemas/2024.4";
+import { EmailService } from "./services/emailService";
 import {
   Calendar,
   MapPin,
@@ -37,7 +38,7 @@ import {
   Wallet,
   Plus,
   Minus,
-  Mail
+  Mail,
 } from "lucide-react";
 
 interface EventNode {
@@ -214,7 +215,7 @@ export function MintTicket() {
   useEffect(() => {
     if (events.length > 0) {
       const initialQuantities: Record<string, number> = {};
-      events.forEach(event => {
+      events.forEach((event) => {
         initialQuantities[event.objectId] = 1;
       });
       setQuantities(initialQuantities);
@@ -225,16 +226,16 @@ export function MintTicket() {
   const getQuantity = (eventId: string) => quantities[eventId] || 1;
 
   const incrementQuantity = (eventId: string, maxAvailable: number) => {
-    setQuantities(prev => ({
+    setQuantities((prev) => ({
       ...prev,
-      [eventId]: Math.min((prev[eventId] || 1) + 1, maxAvailable)
+      [eventId]: Math.min((prev[eventId] || 1) + 1, maxAvailable),
     }));
   };
 
   const decrementQuantity = (eventId: string) => {
-    setQuantities(prev => ({
+    setQuantities((prev) => ({
       ...prev,
-      [eventId]: Math.max((prev[eventId] || 1) - 1, 1)
+      [eventId]: Math.max((prev[eventId] || 1) - 1, 1),
     }));
   };
 
@@ -320,8 +321,6 @@ export function MintTicket() {
       const tx = new Transaction();
       const totalPrice = event.price * quantity * 1_000_000_000; // Convert to MIST
 
-      
-
       // Call buy_ticket multiple times in a single transaction
       const links = [];
       for (let i = 0; i < quantity; i++) {
@@ -343,7 +342,6 @@ export function MintTicket() {
       }
 
       const urls = links.map((link) => link.getLink());
-      console.log(urls);
 
       signAndExecute(
         {
@@ -352,6 +350,32 @@ export function MintTicket() {
         {
           onSuccess: async (result) => {
             await suiClient.waitForTransaction({ digest: result.digest });
+
+            // Send separate emails for each ticket AFTER transaction is successful
+            if (currentAccount) {
+              try {
+                // Send individual emails for each ticket
+                const emailPromises = urls.map((url, index) =>
+                  EmailService.sendTicketConfirmation({
+                    eventName: event.name,
+                    eventDate: event.date,
+                    eventLocation: event.location,
+                    ticketUrls: [url], // Single ticket URL per email
+                    recipientEmail: emails[index] || "frederic010992@gmail.com", // Use provided email or fallback
+                    quantity: 1, // Single ticket per email
+                  }),
+                );
+
+                await Promise.all(emailPromises);
+                console.log(
+                  `${quantity} ticket confirmation emails sent successfully`,
+                );
+              } catch (emailError) {
+                console.error("Failed to send emails:", emailError);
+                // Don't fail the transaction if email fails
+              }
+            }
+
             setSuccess(
               `${quantity} tickets minted successfully for ${event.name}!`,
             );
@@ -400,8 +424,15 @@ export function MintTicket() {
             }}
           >
             <Flex align="center" gap="2">
-              <CheckCircle2 size={16} style={{ color: "var(--suicket-success-600)" }} />
-              <Text style={{ color: "var(--suicket-success-700)" }} size="2" weight="medium">
+              <CheckCircle2
+                size={16}
+                style={{ color: "var(--suicket-success-600)" }}
+              />
+              <Text
+                style={{ color: "var(--suicket-success-700)" }}
+                size="2"
+                weight="medium"
+              >
                 {success}
               </Text>
             </Flex>
@@ -418,8 +449,15 @@ export function MintTicket() {
             }}
           >
             <Flex align="center" gap="2">
-              <AlertCircle size={16} style={{ color: "var(--suicket-error-600)" }} />
-              <Text style={{ color: "var(--suicket-error-700)" }} size="2" weight="medium">
+              <AlertCircle
+                size={16}
+                style={{ color: "var(--suicket-error-600)" }}
+              />
+              <Text
+                style={{ color: "var(--suicket-error-700)" }}
+                size="2"
+                weight="medium"
+              >
                 {error}
               </Text>
             </Flex>
@@ -476,7 +514,8 @@ export function MintTicket() {
                           left: 0,
                           right: 0,
                           height: "50%",
-                          background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)",
+                          background:
+                            "linear-gradient(to top, rgba(0,0,0,0.6), transparent)",
                           pointerEvents: "none",
                         }}
                       />
@@ -507,9 +546,10 @@ export function MintTicket() {
                             position: "absolute",
                             top: "16px",
                             right: "16px",
-                            background: remainingTickets <= 10
-                              ? "var(--suicket-warning-500)"
-                              : "var(--suicket-success-500)",
+                            background:
+                              remainingTickets <= 10
+                                ? "var(--suicket-warning-500)"
+                                : "var(--suicket-success-500)",
                             color: "white",
                             padding: "6px 14px",
                             borderRadius: "var(--suicket-radius-full)",
@@ -593,9 +633,16 @@ export function MintTicket() {
                                 background: "var(--suicket-primary-100)",
                               }}
                             >
-                              <Calendar size={16} style={{ color: "var(--suicket-primary-600)" }} />
+                              <Calendar
+                                size={16}
+                                style={{ color: "var(--suicket-primary-600)" }}
+                              />
                             </div>
-                            <Text size="2" weight="medium" style={{ color: "var(--suicket-text-primary)" }}>
+                            <Text
+                              size="2"
+                              weight="medium"
+                              style={{ color: "var(--suicket-text-primary)" }}
+                            >
                               {event.date}
                             </Text>
                           </Flex>
@@ -613,9 +660,16 @@ export function MintTicket() {
                                 background: "var(--suicket-accent-100)",
                               }}
                             >
-                              <MapPin size={16} style={{ color: "var(--suicket-accent-600)" }} />
+                              <MapPin
+                                size={16}
+                                style={{ color: "var(--suicket-accent-600)" }}
+                              />
                             </div>
-                            <Text size="2" weight="medium" style={{ color: "var(--suicket-text-primary)" }}>
+                            <Text
+                              size="2"
+                              weight="medium"
+                              style={{ color: "var(--suicket-text-primary)" }}
+                            >
                               {event.location}
                             </Text>
                           </Flex>
@@ -624,7 +678,12 @@ export function MintTicket() {
                     )}
 
                     {/* Divider */}
-                    <div style={{ height: "1px", background: "var(--suicket-border-light)" }} />
+                    <div
+                      style={{
+                        height: "1px",
+                        background: "var(--suicket-border-light)",
+                      }}
+                    />
 
                     {/* Price and Stats */}
                     <Flex justify="between" align="center">
@@ -646,14 +705,20 @@ export function MintTicket() {
                           <DollarSign
                             size={20}
                             style={{
-                              color: event.price === 0 ? "var(--suicket-success-600)" : "var(--suicket-primary-600)",
+                              color:
+                                event.price === 0
+                                  ? "var(--suicket-success-600)"
+                                  : "var(--suicket-primary-600)",
                             }}
                           />
                           <Text
                             size="5"
                             weight="bold"
                             style={{
-                              color: event.price === 0 ? "var(--suicket-success-600)" : "var(--suicket-primary-600)",
+                              color:
+                                event.price === 0
+                                  ? "var(--suicket-success-600)"
+                                  : "var(--suicket-primary-600)",
                               letterSpacing: "-0.01em",
                             }}
                           >
@@ -676,11 +741,17 @@ export function MintTicket() {
                           Tickets Sold
                         </Text>
                         <Flex align="center" gap="2" justify="end">
-                          <Ticket size={16} style={{ color: "var(--suicket-accent-600)" }} />
+                          <Ticket
+                            size={16}
+                            style={{ color: "var(--suicket-accent-600)" }}
+                          />
                           <Text
                             size="4"
                             weight="bold"
-                            style={{ color: "var(--suicket-text-primary)", fontFamily: "var(--font-mono)" }}
+                            style={{
+                              color: "var(--suicket-text-primary)",
+                              fontFamily: "var(--font-mono)",
+                            }}
                           >
                             {event.minted} / {event.maxSupply}
                           </Text>
@@ -691,7 +762,11 @@ export function MintTicket() {
                     {/* Enhanced Progress Bar */}
                     <div>
                       <Flex justify="between" align="center" mb="2">
-                        <Text size="1" weight="medium" style={{ color: "var(--suicket-text-tertiary)" }}>
+                        <Text
+                          size="1"
+                          weight="medium"
+                          style={{ color: "var(--suicket-text-tertiary)" }}
+                        >
                           Progress
                         </Text>
                         <Text
@@ -701,8 +776,8 @@ export function MintTicket() {
                             color: isSoldOut
                               ? "var(--suicket-error-600)"
                               : remainingTickets <= 10
-                              ? "var(--suicket-warning-600)"
-                              : "var(--suicket-success-600)",
+                                ? "var(--suicket-warning-600)"
+                                : "var(--suicket-success-600)",
                           }}
                         >
                           {Math.round((event.minted / event.maxSupply) * 100)}%
@@ -725,8 +800,8 @@ export function MintTicket() {
                             background: isSoldOut
                               ? "var(--suicket-error-500)"
                               : remainingTickets <= 10
-                              ? "var(--suicket-gradient-accent)"
-                              : "var(--suicket-gradient-primary)",
+                                ? "var(--suicket-gradient-accent)"
+                                : "var(--suicket-gradient-primary)",
                             borderRadius: "var(--suicket-radius-full)",
                             transition: "width var(--suicket-transition-slow)",
                             position: "relative",
@@ -741,7 +816,8 @@ export function MintTicket() {
                               left: 0,
                               right: 0,
                               bottom: 0,
-                              background: "linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent)",
+                              background:
+                                "linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent)",
                               animation: "shimmer 2s infinite",
                             }}
                           />
@@ -762,7 +838,11 @@ export function MintTicket() {
                           border: "1px solid var(--suicket-border-light)",
                         }}
                       >
-                        <Text size="2" weight="medium" style={{ color: "var(--suicket-text-primary)" }}>
+                        <Text
+                          size="2"
+                          weight="medium"
+                          style={{ color: "var(--suicket-text-primary)" }}
+                        >
                           Quantity:
                         </Text>
                         <Flex align="center" gap="2">
@@ -772,13 +852,18 @@ export function MintTicket() {
                             onClick={() => decrementQuantity(event.objectId)}
                             disabled={getQuantity(event.objectId) <= 1}
                             style={{
-                              cursor: getQuantity(event.objectId) <= 1 ? "not-allowed" : "pointer",
-                              background: getQuantity(event.objectId) <= 1
-                                ? "var(--suicket-neutral-200)"
-                                : "var(--suicket-primary-100)",
-                              color: getQuantity(event.objectId) <= 1
-                                ? "var(--suicket-neutral-400)"
-                                : "var(--suicket-primary-600)",
+                              cursor:
+                                getQuantity(event.objectId) <= 1
+                                  ? "not-allowed"
+                                  : "pointer",
+                              background:
+                                getQuantity(event.objectId) <= 1
+                                  ? "var(--suicket-neutral-200)"
+                                  : "var(--suicket-primary-100)",
+                              color:
+                                getQuantity(event.objectId) <= 1
+                                  ? "var(--suicket-neutral-400)"
+                                  : "var(--suicket-primary-600)",
                             }}
                           >
                             <Minus size={16} />
@@ -798,16 +883,28 @@ export function MintTicket() {
                           <IconButton
                             size="2"
                             variant="soft"
-                            onClick={() => incrementQuantity(event.objectId, remainingTickets)}
-                            disabled={getQuantity(event.objectId) >= remainingTickets}
+                            onClick={() =>
+                              incrementQuantity(
+                                event.objectId,
+                                remainingTickets,
+                              )
+                            }
+                            disabled={
+                              getQuantity(event.objectId) >= remainingTickets
+                            }
                             style={{
-                              cursor: getQuantity(event.objectId) >= remainingTickets ? "not-allowed" : "pointer",
-                              background: getQuantity(event.objectId) >= remainingTickets
-                                ? "var(--suicket-neutral-200)"
-                                : "var(--suicket-primary-100)",
-                              color: getQuantity(event.objectId) >= remainingTickets
-                                ? "var(--suicket-neutral-400)"
-                                : "var(--suicket-primary-600)",
+                              cursor:
+                                getQuantity(event.objectId) >= remainingTickets
+                                  ? "not-allowed"
+                                  : "pointer",
+                              background:
+                                getQuantity(event.objectId) >= remainingTickets
+                                  ? "var(--suicket-neutral-200)"
+                                  : "var(--suicket-primary-100)",
+                              color:
+                                getQuantity(event.objectId) >= remainingTickets
+                                  ? "var(--suicket-neutral-400)"
+                                  : "var(--suicket-primary-600)",
                             }}
                           >
                             <Plus size={16} />
@@ -826,13 +923,16 @@ export function MintTicket() {
                         background: isSoldOut
                           ? "var(--suicket-neutral-400)"
                           : !currentAccount
-                          ? "var(--suicket-neutral-500)"
-                          : "var(--suicket-gradient-primary)",
+                            ? "var(--suicket-neutral-500)"
+                            : "var(--suicket-gradient-primary)",
                         color: "white",
                         border: "none",
                         fontWeight: "700",
                         fontSize: "1rem",
-                        boxShadow: !isSoldOut && currentAccount ? "var(--suicket-shadow-blue)" : "none",
+                        boxShadow:
+                          !isSoldOut && currentAccount
+                            ? "var(--suicket-shadow-blue)"
+                            : "none",
                         transition: "all var(--suicket-transition-fast)",
                         letterSpacing: "0.02em",
                       }}
@@ -859,8 +959,8 @@ export function MintTicket() {
                             {getQuantity(event.objectId) > 1
                               ? `Buy ${getQuantity(event.objectId)} Tickets`
                               : event.price > 0
-                              ? `Buy Now`
-                              : "Get Free Ticket"}
+                                ? `Buy Now`
+                                : "Get Free Ticket"}
                           </Text>
                         </Flex>
                       )}
@@ -877,21 +977,31 @@ export function MintTicket() {
           <Dialog.Content style={{ maxWidth: 500 }}>
             <Dialog.Title>
               <Flex align="center" gap="2">
-                <Mail size={24} style={{ color: "var(--suicket-primary-600)" }} />
+                <Mail
+                  size={24}
+                  style={{ color: "var(--suicket-primary-600)" }}
+                />
                 <Text>Enter Email Addresses</Text>
               </Flex>
             </Dialog.Title>
             <Dialog.Description size="2" mb="4">
               <Text style={{ color: "var(--suicket-text-secondary)" }}>
-                Purchasing {selectedEvent && getQuantity(selectedEvent.objectId)} tickets for{" "}
-                {selectedEvent?.name}. Enter an email address for each ticket recipient.
+                Purchasing{" "}
+                {selectedEvent && getQuantity(selectedEvent.objectId)} tickets
+                for {selectedEvent?.name}. Enter an email address for each
+                ticket recipient.
               </Text>
             </Dialog.Description>
 
             <Flex direction="column" gap="3" py="3">
               {emails.map((email, index) => (
                 <div key={index}>
-                  <Text size="1" weight="medium" mb="1" style={{ color: "var(--suicket-text-tertiary)" }}>
+                  <Text
+                    size="1"
+                    weight="medium"
+                    mb="1"
+                    style={{ color: "var(--suicket-text-tertiary)" }}
+                  >
                     Ticket {index + 1}
                   </Text>
                   <TextField.Root
@@ -913,31 +1023,37 @@ export function MintTicket() {
 
             <Flex gap="3" mt="4" justify="end">
               <Dialog.Close>
-                <Button
-                  variant="soft"
-                  color="gray"
-                  size="3"
-                >
+                <Button variant="soft" color="gray" size="3">
                   Cancel
                 </Button>
               </Dialog.Close>
               <Button
                 size="3"
                 onClick={handleBulkPurchase}
-                disabled={emails.some(email => !email || !email.includes("@"))}
+                disabled={emails.some(
+                  (email) => !email || !email.includes("@"),
+                )}
                 style={{
                   background: "var(--suicket-gradient-primary)",
                   color: "white",
                   border: "none",
                   fontWeight: "600",
-                  cursor: emails.some(email => !email || !email.includes("@")) ? "not-allowed" : "pointer",
-                  opacity: emails.some(email => !email || !email.includes("@")) ? 0.5 : 1,
+                  cursor: emails.some((email) => !email || !email.includes("@"))
+                    ? "not-allowed"
+                    : "pointer",
+                  opacity: emails.some(
+                    (email) => !email || !email.includes("@"),
+                  )
+                    ? 0.5
+                    : 1,
                 }}
               >
                 <Flex align="center" gap="2">
                   <Ticket size={18} />
                   <Text>
-                    Purchase {selectedEvent && getQuantity(selectedEvent.objectId)} Tickets
+                    Purchase{" "}
+                    {selectedEvent && getQuantity(selectedEvent.objectId)}{" "}
+                    Tickets
                   </Text>
                 </Flex>
               </Button>
@@ -965,9 +1081,18 @@ export function MintTicket() {
                   background: "var(--suicket-primary-100)",
                 }}
               >
-                <Info size={20} style={{ color: "var(--suicket-primary-600)" }} />
+                <Info
+                  size={20}
+                  style={{ color: "var(--suicket-primary-600)" }}
+                />
               </div>
-              <Heading size="5" style={{ color: "var(--suicket-text-primary)", fontWeight: "700" }}>
+              <Heading
+                size="5"
+                style={{
+                  color: "var(--suicket-text-primary)",
+                  fontWeight: "700",
+                }}
+              >
                 How it works
               </Heading>
             </Flex>
@@ -989,7 +1114,14 @@ export function MintTicket() {
                 >
                   1
                 </div>
-                <Text size="3" weight="medium" style={{ color: "var(--suicket-text-primary)", paddingTop: "2px" }}>
+                <Text
+                  size="3"
+                  weight="medium"
+                  style={{
+                    color: "var(--suicket-text-primary)",
+                    paddingTop: "2px",
+                  }}
+                >
                   Connect your Sui wallet
                 </Text>
               </Flex>
@@ -1010,7 +1142,14 @@ export function MintTicket() {
                 >
                   2
                 </div>
-                <Text size="3" weight="medium" style={{ color: "var(--suicket-text-primary)", paddingTop: "2px" }}>
+                <Text
+                  size="3"
+                  weight="medium"
+                  style={{
+                    color: "var(--suicket-text-primary)",
+                    paddingTop: "2px",
+                  }}
+                >
                   Browse events and click "Buy Ticket"
                 </Text>
               </Flex>
@@ -1031,7 +1170,14 @@ export function MintTicket() {
                 >
                   3
                 </div>
-                <Text size="3" weight="medium" style={{ color: "var(--suicket-text-primary)", paddingTop: "2px" }}>
+                <Text
+                  size="3"
+                  weight="medium"
+                  style={{
+                    color: "var(--suicket-text-primary)",
+                    paddingTop: "2px",
+                  }}
+                >
                   View your tickets in "My Tickets"
                 </Text>
               </Flex>
@@ -1052,7 +1198,14 @@ export function MintTicket() {
                 >
                   4
                 </div>
-                <Text size="3" weight="medium" style={{ color: "var(--suicket-text-primary)", paddingTop: "2px" }}>
+                <Text
+                  size="3"
+                  weight="medium"
+                  style={{
+                    color: "var(--suicket-text-primary)",
+                    paddingTop: "2px",
+                  }}
+                >
                   Scan QR code at the event for check-in
                 </Text>
               </Flex>
