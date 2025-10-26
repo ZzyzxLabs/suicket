@@ -92,7 +92,7 @@ public fun organize_event (event_name: String, event_description: String, image_
 }
 
 #[allow(lint(self_transfer))]
-public fun buy_ticket (user_coin: Coin<SUI>, event: &mut Event, ctx: &mut TxContext) { 
+public fun buy_ticket (user_coin: Coin<SUI>, event: &mut Event, ctx: &mut TxContext) : Ticket { 
     assert!(event.ticket_sold + 1 <= event.max_ticket_supply, EMaxSupplyReached);
 
     let mut user_balance: Balance<SUI> = coin::into_balance<SUI>(user_coin);
@@ -111,9 +111,9 @@ public fun buy_ticket (user_coin: Coin<SUI>, event: &mut Event, ctx: &mut TxCont
         status: STATUS_VALID,
     };
     event.ticket_sold = event.ticket_sold + 1;
-    transfer::public_transfer(ticket, ctx.sender());
     transfer::public_transfer(user_coin, ctx.sender());
     transfer::public_transfer(out_coin, event.event_owner_address);
+    ticket
 }
 
 public fun transfer_ticket(ticket: Ticket, recipient: address, _ctx: &mut TxContext) {

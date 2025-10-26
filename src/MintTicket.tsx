@@ -6,6 +6,8 @@ import {
   useSuiClient,
 } from "@mysten/dapp-kit";
 import { coinWithBalance, Transaction, Inputs } from "@mysten/sui/transactions";
+import { ZkSendLinkBuilder } from "@mysten/zksend";
+
 import {
   Button,
   Container,
@@ -190,43 +192,19 @@ export function MintTicket() {
       return;
     }
 
-    // if (!counterId) {
-    //   setError("Counter ID not configured. Please check your .env file");
-    //   return;
-    // }
-
-    // setMintingEventId(event.objectId);
-
     try {
       const tx = new Transaction();
 
-      // tx.setSender(currentAccount.address);
-      // const [gas] = tx.splitCoins(tx.gas, [tx.pure("u64", 100000)]);
-      // tx.transferObjects([gas], currentAccount.address);
-      // Get user's SUI coins
-      // const coins = await suiClient.getCoins({
-      // owner: currentAccount.address,
-      // coinType: "0x2::sui::SUI",
-      // });
-      // console.log("coins", coins);
-      // tx.setGasPayment([
-      //   {
-      //     objectId: coins.data[1].coinObjectId,
-      //     digest: coins.data[1].digest,
-      //     version: coins.data[1].version,
-      //   },
-      // ]);
-
-      // tx.setGasPayment([gas]);
       const [coin] = tx.splitCoins(tx.gas, [
         tx.pure("u64", event.price * 1_000_000_000),
       ]);
-      // tx.transferObjects([gas], currentAccount.address);
 
-      tx.moveCall({
+      const [ticket] = tx.moveCall({
         target: `${suicketPackageId}::main::buy_ticket`,
         arguments: [coin, tx.object(event.objectId)],
       });
+
+      tx.transferObjects([ticket], currentAccount.address);
 
       signAndExecute(
         {
@@ -237,7 +215,68 @@ export function MintTicket() {
             await suiClient.waitForTransaction({ digest: result.digest });
             setSuccess(`Ticket minted successfully for ${event.name}!`);
             setMintingEventId("");
-            // TODO: Refetch events when using real on-chain data
+          },
+          onError: (err) => {
+            setError(`Transaction failed: ${err.message}`);
+            setMintingEventId("");
+          },
+        },
+      );
+    } catch (err: any) {
+      setError(`Failed to prepare transaction: ${err.message}`);
+      setMintingEventId("");
+    }
+  };
+
+  const buyMultipleTickets = async (
+    event: EventData,
+    quantity: number,
+    emails: string[],
+  ) => {
+    if (quantity > event.maxSupply || quantity !== emails.length) {
+      setError("Invalid input");
+      return;
+    }
+
+    try {
+      const tx = new Transaction();
+      const totalPrice = event.price * quantity * 1_000_000_000; // Convert to MIST
+
+      const [coin] = tx.splitCoins(tx.gas, [tx.pure("u64", totalPrice)]);
+
+      // Call buy_ticket multiple times in a single transaction
+      const links = [];
+      for (let i = 0; i < quantity; i++) {
+        const link = new ZkSendLinkBuilder({
+          sender: currentAccount?.address ?? "",
+          network: "testnet",
+        });
+        let ticket = tx.moveCall({
+          target: `${suicketPackageId}::main::buy_ticket`,
+          arguments: [coin, tx.object(event.objectId)],
+        });
+
+        link.addClaimableObjectRef(ticket, `${suicketPackageId}::main::Ticket`);
+        await link.createSendTransaction({
+          transaction: tx,
+        });
+        links.push(link);
+      }
+
+      const urls = links.map((link) => link.getLink());
+      console.log(urls);
+
+      signAndExecute(
+        {
+          transaction: tx,
+        },
+        {
+          onSuccess: async (result) => {
+            await suiClient.waitForTransaction({ digest: result.digest });
+            setSuccess(
+              `${quantity} tickets minted successfully for ${event.name}!`,
+            );
+            setMintingEventId("");
           },
           onError: (err) => {
             setError(`Transaction failed: ${err.message}`);

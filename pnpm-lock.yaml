@@ -17,6 +17,9 @@ importers:
       '@mysten/sui.js':
         specifier: ^0.54.1
         version: 0.54.1(typescript@5.9.3)
+      '@mysten/zksend':
+        specifier: ^0.14.7
+        version: 0.14.7(typescript@5.9.3)
       '@radix-ui/colors':
         specifier: ^3.0.0
         version: 3.0.0
@@ -393,6 +396,9 @@ packages:
 
   '@mysten/window-wallet-core@0.1.0':
     resolution: {integrity: sha512-QVFthpAv+HJBqoLjsE6gZylE28lrzEd/C68S5tyOCpRV6T3O+P3LCcFmNkLK8gNM6DJNHc/GZgM3f4rTNGOfAQ==}
+
+  '@mysten/zksend@0.14.7':
+    resolution: {integrity: sha512-Xd5lE6tRLO1VPWHijXTHopEBX9bE6iDGvuslNx2ZScoavAhbXktY1IGTDecvFXnNrAukq+OcP4okSqPPiBnlJg==}
 
   '@noble/curves@1.9.4':
     resolution: {integrity: sha512-2bKONnuM53lINoDrSmK8qP8W271ms7pygDhZt4SiLOoLwBtoHqeCFi6RG42V8zd3mLHuJFhU/Bmaqo4nX0/kBw==}
@@ -1850,6 +1856,10 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
+  nanostores@1.0.1:
+    resolution: {integrity: sha512-kNZ9xnoJYKg/AfxjrVL4SS0fKX++4awQReGqWnwTRHxeHGZ1FJFVgTqr/eMrNQdp0Tz7M7tG/TDaX8QfHDwVCw==}
+    engines: {node: ^20.0.0 || >=22.0.0}
+
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
 
@@ -2462,6 +2472,20 @@ snapshots:
       '@mysten/utils': 0.2.0
       jose: 6.1.0
       valibot: 0.36.0
+
+  '@mysten/zksend@0.14.7(typescript@5.9.3)':
+    dependencies:
+      '@mysten/sui': 1.43.1(typescript@5.9.3)
+      '@mysten/utils': 0.2.0
+      '@mysten/wallet-standard': 0.19.4(typescript@5.9.3)
+      '@mysten/window-wallet-core': 0.1.0
+      mitt: 3.0.1
+      nanostores: 1.0.1
+      valibot: 0.36.0
+    transitivePeerDependencies:
+      - '@gql.tada/svelte-support'
+      - '@gql.tada/vue-support'
+      - typescript
 
   '@noble/curves@1.9.4':
     dependencies:
@@ -3940,6 +3964,8 @@ snapshots:
   ms@2.1.3: {}
 
   nanoid@3.3.11: {}
+
+  nanostores@1.0.1: {}
 
   natural-compare@1.4.0: {}
 
